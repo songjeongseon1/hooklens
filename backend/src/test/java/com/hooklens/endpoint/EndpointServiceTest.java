@@ -2,6 +2,8 @@ package com.hooklens.endpoint;
 
 import com.hooklens.endpoint.EndpointService.CreatedEndpoint;
 import com.hooklens.global.config.TimeConfig;
+import com.hooklens.global.exception.BusinessException;
+import com.hooklens.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -80,5 +83,32 @@ class EndpointServiceTest {
         assertThatThrownBy(() -> endpointService.createAnonymous(null))
                 .isInstanceOf(IllegalStateException.class);
         verify(endpointRepository, never()).save(any());
+    }
+
+    @Test
+    void 만료되지_않은_엔드포인트는_slug로_조회된다() {
+        Endpoint endpoint = Endpoint.createAnonymous("aZ3kP9xQ2m", null, "hash", NOW.minusHours(23));
+        given(endpointRepository.findBySlug("aZ3kP9xQ2m")).willReturn(Optional.of(endpoint));
+
+        assertThat(endpointService.getActiveBySlug("aZ3kP9xQ2m")).isSameAs(endpoint);
+    }
+
+    @Test
+    void 없는_slug면_ENDPOINT_NOT_FOUND() {
+        given(endpointRepository.findBySlug("noSuchSlug")).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> endpointService.getActiveBySlug("noSuchSlug"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.ENDPOINT_NOT_FOUND);
+    }
+
+    @Test
+    void 발급_후_24시간이_지나면_ENDPOINT_EXPIRED() {
+        Endpoint endpoint = Endpoint.createAnonymous("aZ3kP9xQ2m", null, "hash", NOW.minusHours(24));
+        given(endpointRepository.findBySlug("aZ3kP9xQ2m")).willReturn(Optional.of(endpoint));
+
+        assertThatThrownBy(() -> endpointService.getActiveBySlug("aZ3kP9xQ2m"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.ENDPOINT_EXPIRED);
     }
 }

@@ -15,7 +15,11 @@
 
 - 1주차 진행 중. 프로젝트 세팅 완료(공통 응답 `ApiResponse`, `ErrorCode`, `GlobalExceptionHandler`, local/prod 프로필).
 - 완료: REQ-EP-001 (비회원 엔드포인트 발급 `POST /api/endpoints`)
-- 다음 작업: REQ-EP-002 (비회원 엔드포인트 만료, 수신 시 410)
+- 완료: REQ-EP-002 도메인·서비스 (`Endpoint.isExpired`, `EndpointService.getActiveBySlug` → 404/410)
+- 다음 작업: REQ-HOOK-001 (웹훅 수신·저장)
+  - 수신 컨트롤러는 `getActiveBySlug`로 엔드포인트를 찾는다 → 이때 410이 실제로 연결된다. 만료 엔드포인트 수신 시 410 통합 테스트를 포함할 것.
+  - `/h/**`의 404·410 에러 바디 형식을 정해야 한다 (사용자 설정 응답이 없는 상황).
+- 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
 ## 명령어

@@ -59,4 +59,12 @@ public class Endpoint {
         endpoint.expiresAt = now.plus(ANONYMOUS_TTL);
         return endpoint;
     }
+
+    /**
+     * 만료 시각 정각부터 만료로 본다. 만료 시각이 없으면(회원 엔드포인트) 만료되지 않는다.
+     * 스케줄러로 상태를 바꾸지 않고 요청 시점에 판단하므로 만료가 늦게 반영되는 일이 없다.
+     */
+    public boolean isExpired(LocalDateTime now) {
+        return expiresAt != null && !now.isBefore(expiresAt);
+    }
 }
