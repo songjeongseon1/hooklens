@@ -14,7 +14,8 @@
 ## 현재 진행 상황
 
 - 1주차 진행 중. 프로젝트 세팅 완료(공통 응답 `ApiResponse`, `ErrorCode`, `GlobalExceptionHandler`, local/prod 프로필).
-- 다음 작업: REQ-EP-001 (비회원 엔드포인트 발급)
+- 완료: REQ-EP-001 (비회원 엔드포인트 발급 `POST /api/endpoints`)
+- 다음 작업: REQ-EP-002 (비회원 엔드포인트 만료, 수신 시 410)
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
 ## 명령어
@@ -42,7 +43,9 @@
 - **Spring Boot 4.0.x**: 웹 스타터는 `spring-boot-starter-webmvc`, JSON은 Jackson 3(`tools.jackson.*` 패키지, 단 어노테이션은 그대로 `com.fasterxml.jackson.annotation`), `jakarta.*` 사용. Boot 2·3 예제를 그대로 옮기지 말고, 확실하지 않은 API는 먼저 확인한다.
 - **Tailwind CSS 4**: `tailwind.config.js`·`@tailwind` 지시어를 쓰지 않는다. CSS에서 `@import "tailwindcss";`, 설정은 `@theme`, Vite 플러그인은 `@tailwindcss/vite`.
 - **React 19 + Vite 8**: 함수 컴포넌트와 훅만 사용한다.
-- Testcontainers·springdoc은 아직 `build.gradle`에 없다. 처음 필요한 기능에서 추가를 제안하고 확인을 받는다.
+- **Testcontainers 2.x**: 아티팩트는 `testcontainers-mysql` 형식, 클래스는 `org.testcontainers.mysql.MySQLContainer`(제네릭 없음). 통합 테스트는 `@Import(TestcontainersConfiguration.class)` + `@ActiveProfiles("test")`.
+- MockMvc 어노테이션은 `org.springframework.boot.webmvc.test.autoconfigure` 패키지(`spring-boot-starter-webmvc-test`).
+- springdoc은 아직 `build.gradle`에 없다. 처음 필요한 기능에서 추가를 제안하고 확인을 받는다.
 
 ## 폴더 구조
 

@@ -3,6 +3,7 @@ package com.hooklens.global.exception;
 import com.hooklens.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         return ResponseEntity.status(ErrorCode.INVALID_INPUT.getStatus())
                 .body(ApiResponse.fail(ErrorCode.INVALID_INPUT, message));
+    }
+
+    /** JSON 문법이 틀렸거나 타입이 맞지 않는 바디 (없으면 500으로 응답됨) */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotReadable(HttpMessageNotReadableException e) {
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT.getStatus())
+                .body(ApiResponse.fail(ErrorCode.INVALID_INPUT, "요청 바디 형식이 올바르지 않습니다."));
     }
 
     @ExceptionHandler(Exception.class)

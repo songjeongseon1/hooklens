@@ -1,0 +1,8 @@
+# 테스트 전용 설정. DB 접속 정보는 Testcontainers(@ServiceConnection)가 자동으로 넣어준다.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+hooklens:
+  base-url: http://test.hooklens

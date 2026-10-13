@@ -40,6 +40,12 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // MockMvc (Spring Boot 4부터 웹 테스트 지원이 별도 스타터로 분리됨)
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    // 통합 테스트용 실제 MySQL 컨테이너 (Docker 필요)
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Spring Security는 3주차(REQ-AUTH-001)에 추가한다.

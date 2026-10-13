@@ -12,3 +12,6 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
+
+hooklens:
+  base-url: ${HOOKLENS_BASE_URL}   # 예: https://hooklens.example.com
