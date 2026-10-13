@@ -1,0 +1,14 @@
+# 운영(AWS) 설정. 모든 접속 정보는 배포 시 환경 변수로 주입한다 (4주차).
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate   # 운영에서는 테이블을 자동 변경하지 않음
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}

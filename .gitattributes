@@ -1,0 +1,4 @@
+# 줄바꿈을 LF로 고정 (Windows에서 커밋해도 리눅스 CI에서 gradlew가 동작하도록)
+* text=auto eol=lf
+*.bat text eol=crlf
+*.jar binary

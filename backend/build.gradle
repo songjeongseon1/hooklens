@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.hooklens'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 웹 API (Spring Boot 4부터 spring-boot-starter-web 대신 webmvc 이름을 씀)
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    // DB
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    // Redis (Rate Limit, Pub/Sub, Refresh 토큰)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // 요청 값 검증 (@Valid)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // 헬스 체크 (/actuator/health)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Spring Security는 3주차(REQ-AUTH-001)에 추가한다.
+    // 지금 넣으면 모든 요청에 기본 로그인이 걸려 웹훅 수신 테스트가 막힌다.
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

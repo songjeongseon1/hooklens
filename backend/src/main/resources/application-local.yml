@@ -1,0 +1,20 @@
+# 로컬 개발용 설정. 실제 비밀번호는 환경 변수로 주입한다 (.env 참고).
+spring:
+  config:
+    # 루트의 .env를 프로퍼티 파일로 읽는다 (작업 디렉터리가 backend 기준). 없으면 무시.
+    import: optional:file:../.env[.properties]
+  datasource:
+    url: jdbc:mysql://localhost:3307/hooklens?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update   # 로컬에서만 사용. 운영은 validate로 둔다.
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379

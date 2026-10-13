@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: hooklens
+  profiles:
+    active: local
+  jpa:
+    open-in-view: false   # 트랜잭션 밖에서 지연 로딩이 일어나지 않게 막음
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health   # 운영에서 불필요한 정보가 노출되지 않게 health만 공개

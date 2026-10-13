@@ -1,0 +1,38 @@
+# 로컬 개발용 MySQL·Redis. 실행: docker compose up -d
+# 값은 같은 폴더의 .env 파일에서 읽는다.
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hooklens-mysql
+    environment:
+      MYSQL_DATABASE: hooklens
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"   # PC에 설치된 MySQL(3306)과 충돌하지 않게 3307 사용
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:   # 준비 완료 여부 확인 (docker compose ps에서 healthy로 표시)
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: hooklens-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
