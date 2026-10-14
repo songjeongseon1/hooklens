@@ -16,9 +16,12 @@
 - 1주차 진행 중. 프로젝트 세팅 완료(공통 응답 `ApiResponse`, `ErrorCode`, `GlobalExceptionHandler`, local/prod 프로필).
 - 완료: REQ-EP-001 (비회원 엔드포인트 발급 `POST /api/endpoints`)
 - 완료: REQ-EP-002 도메인·서비스 (`Endpoint.isExpired`, `EndpointService.getActiveBySlug` → 404/410)
-- 다음 작업: REQ-HOOK-001 (웹훅 수신·저장)
-  - 수신 컨트롤러는 `getActiveBySlug`로 엔드포인트를 찾는다 → 이때 410이 실제로 연결된다. 만료 엔드포인트 수신 시 410 통합 테스트를 포함할 것.
-  - `/h/**`의 404·410 에러 바디 형식을 정해야 한다 (사용자 설정 응답이 없는 상황).
+- 완료: REQ-HOOK-001 (웹훅 수신·저장 `/h/{slug}/**` → `request_log`)
+  - `HookRequestReader`가 바디를 원본 바이트로 직접 읽는다. `spring.mvc.formcontent.filter.enabled=false` (켜면 PUT 폼 바디가 비어 저장됨).
+  - `/h/**`의 404·410은 관리 API와 같은 `ApiResponse` JSON 형식으로 응답한다(결정됨).
+  - 지금은 항상 `200 {"ok":true}` 응답 (`HookReceiveController.DEFAULT_RESPONSE_BODY`).
+  - 한계: 바이너리 바디는 UTF-8 문자열로 저장해 깨질 수 있다. IP는 `getRemoteAddr` — 배포 시 Nginx 뒤 실제 IP 처리 필요.
+- 다음 작업: REQ-HOOK-002 (설정된 응답 반환, 없으면 200 `{"ok":true}`)
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
@@ -94,7 +97,7 @@ hooklens/
 
 - **member**: member_id(PK), email(UK), password(BCrypt), nickname, role, created_at, updated_at
 - **endpoint**: endpoint_id(PK), member_id(FK, NULL=비회원), slug(UK, 영숫자 10자), name, anonymous_token_hash(SHA-256), forward_url, expires_at(비회원 24시간), created_at
-- **request_log**: request_id(PK), endpoint_id(FK), method, path, query_string, headers(JSON), body(MEDIUMTEXT, 최대 1MB), content_type, ip, size_bytes, received_at — 인덱스 (endpoint_id, request_id DESC), (received_at)
+- **request_log**: request_id(PK), endpoint_id(FK), method, path(VARCHAR 2048), query_string(TEXT), headers(JSON), body(MEDIUMTEXT, 최대 1MB), content_type, ip, size_bytes, received_at — 인덱스 (endpoint_id, request_id DESC), (received_at)
 - **response_rule**: rule_id(PK), endpoint_id(FK), priority, is_default, match_method, match_header, match_body_contains, status_code, response_headers(JSON), response_body, delay_ms(0~5000)
 - 엔드포인트 삭제 시 요청 로그·응답 규칙 함께 삭제
 - Redis: `refresh:{memberId}`(14일), `rate:{endpointId}:{yyyyMMddHHmm}`(2분), 채널 `hook-events`
