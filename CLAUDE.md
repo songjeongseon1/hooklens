@@ -1,7 +1,7 @@
 # HookLens — 웹훅 디버거
 
 외부 서비스(결제사, 깃허브 등)가 보내는 웹훅을 고유 URL로 받아 실시간으로 보여주고, 원하는 응답을 돌려주는 개발자 도구.
-개인 포트폴리오 프로젝트이며, 4주 안에 P0·P1 기능을 완성하고 AWS에 배포하는 것이 목표다.
+개인 포트폴리오 프로젝트이며, 1차 목표는 2주 안에 P0(MVP) 기능을 완성하고 AWS EC2에 배포하는 것이다. P1은 2차 개발로 진행한다.
 
 ## 진행 방식 (중요)
 
@@ -36,7 +36,7 @@
 - 실시간: SSE (SseEmitter) — WebSocket은 이미 다른 프로젝트에서 써봤고, 단방향 푸시라 SSE 선택
 - DB: MySQL 8 (로컬은 Docker Compose, 포트 3307 / 운영은 AWS RDS)
 - 캐시·제한: Redis 7 (Rate Limit, Refresh 토큰, 다중 서버용 Pub/Sub)
-- 인증: Spring Security + JWT (3주차에 추가, 그 전에는 Security 의존성 넣지 않음), 비회원은 익명 토큰
+- 인증: Spring Security + JWT (2차 개발에서 추가, 그 전에는 Security 의존성 넣지 않음), 비회원은 익명 토큰
 - 프론트엔드: React 19, JavaScript(ES6+), Vite 8, React Router, Axios, Tailwind CSS 4
 - 테스트: JUnit 5, Testcontainers(MySQL·Redis 실제 컨테이너로 통합 테스트)
 - 배포: Docker, AWS EC2 + RDS, Nginx, GitHub Actions
@@ -79,7 +79,7 @@ hooklens/
 
 - 새 의존성은 추가하기 전에 이유를 설명하고 확인을 받는다.
 - `.env` 파일은 읽거나 수정하지 않는다. 변수 이름이 바뀌면 `.env.example`만 고친다.
-- 3주차(REQ-AUTH-001) 전에는 Spring Security 의존성을 넣지 않는다 — 기본 로그인이 걸려 웹훅 수신 테스트가 막힌다.
+- 2차 개발(REQ-AUTH-001) 전에는 Spring Security 의존성을 넣지 않는다 — 기본 로그인이 걸려 웹훅 수신 테스트가 막힌다.
 - 요청하지 않은 기능(다음 요구사항 ID)까지 미리 구현하지 않는다.
 - 운영 프로필의 `ddl-auto`를 `validate` 외 값으로 바꾸지 않는다.
 
@@ -106,7 +106,7 @@ hooklens/
 - 비회원 엔드포인트: `expires_at`이 지난 엔드포인트를 로그·응답 규칙과 함께 삭제 (그 전까지는 수신 시 410)
 - 대량 삭제는 한 번에 지우지 않고 1,000건씩 나눠 삭제한다(테이블 잠금 방지).
 
-## 요구사항 (우선순위: P0 = MVP, P1 = 4주 범위, P2 = 이후)
+## 요구사항 (우선순위: P0 = 1차(2주, MVP), P1 = 2차 개발, P2 = 이후)
 
 | ID | 내용 | 우선순위 |
 | --- | --- | --- |
@@ -126,9 +126,9 @@ hooklens/
 | REQ-AUTH-001~002 | 회원가입·로그인(JWT), 토큰 재발급·로그아웃 | P1 |
 | REQ-RES-002, RPL-003, UX-001~002 | 조건부 응답, 자동 포워딩, cURL 내보내기, 검색 | P2 |
 
-## 일정
+## 일정 (1차: 2주)
 
-- 1주차: 세팅, 엔드포인트 발급, 웹훅 수신·저장, 요청 조회 API
-- 2주차: SSE, 대시보드·상세 화면, 기본 응답 설정 → **MVP 완성**
-- 3주차: 회원·JWT, 엔드포인트 관리, Rate Limit·크기 제한, 리플레이·SSRF 차단
-- 4주차: Docker·EC2 배포, CI/CD, 로그 정리 스케줄러, README·회고 → **배포 완료**
+- 1주차: 세팅, 엔드포인트 발급(REQ-EP-001·002), 웹훅 수신·저장(REQ-HOOK-001·002), 요청 목록·상세 조회 API(REQ-LOG-002·003)
+- 2주차: SSE 실시간 반영(REQ-LOG-001), React 대시보드·상세 화면, 기본 응답 설정(REQ-RES-001), EC2 + Docker 수동 배포 → **MVP 완성·배포**
+- 2차 개발(이후): 회원·JWT, 엔드포인트 관리, Rate Limit·크기 제한, 리플레이·SSRF 차단, GitHub Actions 자동 배포, 로그 정리 스케줄러
+- 1차 기간에는 Redis를 쓰는 기능(Rate Limit, Pub/Sub)과 Spring Security를 만들지 않는다. SSE는 서버 1대 기준 메모리 방식으로 시작한다. (Redis 의존성·컨테이너 설정은 그대로 둔다.)

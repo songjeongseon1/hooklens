@@ -3,6 +3,12 @@ spring:
     name: hooklens
   profiles:
     active: local
+  mvc:
+    formcontent:
+      filter:
+        # 켜져 있으면 PUT/PATCH/DELETE 폼 요청의 바디를 이 필터가 먼저 읽어버려,
+        # 웹훅 수신(/h/**)에서 원본 바디가 비어 저장된다. 관리 API는 JSON만 쓰므로 끈다.
+        enabled: false
   jpa:
     open-in-view: false   # 트랜잭션 밖에서 지연 로딩이 일어나지 않게 막음
     properties:
