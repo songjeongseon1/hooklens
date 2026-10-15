@@ -16,9 +16,17 @@
 - 1주차 진행 중. 프로젝트 세팅 완료(공통 응답 `ApiResponse`, `ErrorCode`, `GlobalExceptionHandler`, local/prod 프로필).
 - 완료: REQ-EP-001 (비회원 엔드포인트 발급 `POST /api/endpoints`)
 - 완료: REQ-EP-002 도메인·서비스 (`Endpoint.isExpired`, `EndpointService.getActiveBySlug` → 404/410)
-- 다음 작업: REQ-HOOK-001 (웹훅 수신·저장)
-  - 수신 컨트롤러는 `getActiveBySlug`로 엔드포인트를 찾는다 → 이때 410이 실제로 연결된다. 만료 엔드포인트 수신 시 410 통합 테스트를 포함할 것.
-  - `/h/**`의 404·410 에러 바디 형식을 정해야 한다 (사용자 설정 응답이 없는 상황).
+- 완료: REQ-HOOK-001 (웹훅 수신·저장 `/h/{slug}/**` → `request_log`)
+  - `HookRequestReader`가 바디를 원본 바이트로 직접 읽는다. `spring.mvc.formcontent.filter.enabled=false` (켜면 PUT 폼 바디가 비어 저장됨).
+  - `/h/**`의 404·410은 관리 API와 같은 `ApiResponse` JSON 형식으로 응답한다(결정됨).
+  - 지금은 항상 `200 {"ok":true}` 응답 (`HookReceiveController.DEFAULT_RESPONSE_BODY`).
+  - 한계: 바이너리 바디는 UTF-8 문자열로 저장해 깨질 수 있다. IP는 `getRemoteAddr` — 배포 시 Nginx 뒤 실제 IP 처리 필요.
+- 완료: REQ-HOOK-002 (설정된 응답 반환, 없으면 200 `{"ok":true}`)
+  - `ResponseRule`(기본 규칙만, priority·match_*는 P2) → `HookReceiveService.receive`가 로그 저장 후 `Optional<ResponseRule>` 반환 → 컨트롤러가 `HookResponseBuilder`로 응답 생성
+  - 응답 헤더 JSON 형식은 `{"이름": "값"}` (요청 로그의 `{"이름": ["값"]}`과 다름 — 사용자가 직접 입력하는 값이라 단순하게). 전송 제어 헤더(Content-Length 등)는 무시.
+  - 지연(`delayMs`)은 트랜잭션이 끝난 뒤 컨트롤러에서 `Thread.sleep` → 로그는 바로 보이고 DB 커넥션을 붙잡지 않는다.
+  - 가상 스레드 사용(`spring.threads.virtual.enabled: true`). 실행 시 요청 스레드 이름이 `tomcat-handler-N`이면 켜진 것(MockMvc 테스트로는 확인 불가).
+- 다음 작업: REQ-LOG-002 (요청 목록 최신순 커서 조회)
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
@@ -75,6 +83,35 @@ hooklens/
 - **비회원 인증**: 엔드포인트 생성 시 익명 토큰(랜덤 32바이트)을 한 번만 응답으로 내려주고, DB에는 SHA-256 해시만 저장한다. 이후 관리 API 요청은 `X-Anonymous-Token` 헤더로 보낸다.
 - **보안**: 리플레이 대상 URL이 사설·루프백·링크로컬 IP로 해석되면 차단한다(SSRF 방지). DNS 해석 결과 IP로 검사한다.
 
+## 프론트엔드 규칙 (2주차~)
+
+### 진행 방식
+- 화면 하나, 컴포넌트 하나 단위로 작게 만든다. 한 번에 여러 화면을 만들지 않는다.
+- 새 개념(훅, 라이브러리, 브라우저 API)을 처음 쓸 때는 코드 전에 무엇을, 왜 쓰는지 짧게 설명한다. 이미 쓴 패턴의 반복(스타일, 레이아웃)은 설명 없이 바로 만들어도 된다.
+- 만든 뒤에는 브라우저에서 확인할 동작(어떤 버튼을 누르면 무엇이 보여야 하는지)을 알려 준다.
+- 에러를 고칠 때는 원인을 먼저 한두 줄로 설명하고 고친다.
+
+### 코드 규칙
+- 폴더: `src/pages`(라우트 화면), `src/components`(재사용 UI), `src/api`(서버 호출), `src/hooks`(커스텀 훅)
+- 컴포넌트는 한 파일에 하나, 150줄을 넘으면 나눈다. 파일 이름은 PascalCase(`RequestList.jsx`).
+- 서버 호출은 `src/api/`에만 둔다. 컴포넌트에서 axios를 직접 호출하지 않는다.
+- 응답은 공통 형식 `{ success, data, error }`이므로 `src/api/`에서 `data`를 꺼내고, 실패 시 `error.message`를 담은 에러를 던진다.
+- 스타일은 Tailwind 클래스만 쓴다. 별도 CSS 파일·CSS-in-JS 라이브러리를 추가하지 않는다.
+- 상태 관리 라이브러리(Redux, Zustand 등)는 쓰지 않는다. `useState`·`useContext`로 충분한 규모다.
+- 시간은 서버가 주는 ISO-8601(+09:00)을 그대로 파싱해 표시한다(목록은 "3분 전", 상세는 전체 시각).
+
+### 개발 환경
+- 로컬에서는 Vite 프록시로 `/api`, `/h`를 `http://localhost:8080`에 넘긴다 → 백엔드에 CORS 설정을 추가하지 않는다.
+- 익명 토큰은 `localStorage`에 slug별로 저장하고, `src/api/`에서 `X-Anonymous-Token` 헤더로 붙인다.
+
+### 미리 알아둘 것
+- **SSE 인증(REQ-LOG-001, 결정됨)**: 브라우저 `EventSource`는 커스텀 헤더를 보낼 수 없으므로 **`fetch` 스트림으로 연결해 `X-Anonymous-Token` 헤더를 그대로 쓴다.**
+  - 이유: 관리 API와 인증 방식이 하나로 통일되고, 백엔드에 추가 작업이 없으며, 토큰이 URL(Nginx 로그·브라우저 기록)에 남지 않는다.
+  - 검토한 대안: 쿼리 파라미터(토큰 URL 노출), 일회용 티켓(티켓 저장소·재연결 처리 필요), 쿠키(인증 방식이 둘로 갈림·CSRF).
+  - 구현: 라이브러리 없이 `fetch` → `response.body.getReader()`로 `data:` 줄을 직접 파싱한다(`src/hooks/`의 커스텀 훅, 공부 목적).
+  - 재연결: 끊기면 잠시 후 다시 연결하고, 놓친 요청은 목록 API(REQ-LOG-002)로 다시 불러온다. SSE는 새 요청 알림용, 정확한 목록은 API가 기준.
+  - 배포 시 Nginx에 `proxy_buffering off;` 필수(없으면 응답을 모았다가 보내 실시간이 안 됨).
+
 ## 하지 말 것
 
 - 새 의존성은 추가하기 전에 이유를 설명하고 확인을 받는다.
@@ -94,7 +131,7 @@ hooklens/
 
 - **member**: member_id(PK), email(UK), password(BCrypt), nickname, role, created_at, updated_at
 - **endpoint**: endpoint_id(PK), member_id(FK, NULL=비회원), slug(UK, 영숫자 10자), name, anonymous_token_hash(SHA-256), forward_url, expires_at(비회원 24시간), created_at
-- **request_log**: request_id(PK), endpoint_id(FK), method, path, query_string, headers(JSON), body(MEDIUMTEXT, 최대 1MB), content_type, ip, size_bytes, received_at — 인덱스 (endpoint_id, request_id DESC), (received_at)
+- **request_log**: request_id(PK), endpoint_id(FK), method, path(VARCHAR 2048), query_string(TEXT), headers(JSON), body(MEDIUMTEXT, 최대 1MB), content_type, ip, size_bytes, received_at — 인덱스 (endpoint_id, request_id DESC), (received_at)
 - **response_rule**: rule_id(PK), endpoint_id(FK), priority, is_default, match_method, match_header, match_body_contains, status_code, response_headers(JSON), response_body, delay_ms(0~5000)
 - 엔드포인트 삭제 시 요청 로그·응답 규칙 함께 삭제
 - Redis: `refresh:{memberId}`(14일), `rate:{endpointId}:{yyyyMMddHHmm}`(2분), 채널 `hook-events`

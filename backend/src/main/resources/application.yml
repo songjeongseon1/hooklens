@@ -3,6 +3,9 @@ spring:
     name: hooklens
   profiles:
     active: local
+  threads:
+    virtual:
+      enabled: true # 지연 응답(delay_ms) 동안 스레드가 묶이지 않게 가상 스레드로 처리
   mvc:
     formcontent:
       filter:
