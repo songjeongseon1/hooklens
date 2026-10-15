@@ -21,11 +21,12 @@
   - `/h/**`의 404·410은 관리 API와 같은 `ApiResponse` JSON 형식으로 응답한다(결정됨).
   - 지금은 항상 `200 {"ok":true}` 응답 (`HookReceiveController.DEFAULT_RESPONSE_BODY`).
   - 한계: 바이너리 바디는 UTF-8 문자열로 저장해 깨질 수 있다. IP는 `getRemoteAddr` — 배포 시 Nginx 뒤 실제 IP 처리 필요.
-- 진행 중: REQ-HOOK-002 (설정된 응답 반환, 없으면 200 `{"ok":true}`) — 사용자와 단계별로 같이 작성 중
-  - 완료: `ResponseRule` 엔티티·Repository, `HookReceiveService.receive`가 `Optional<ResponseRule>` 반환, `HookResponseBuilder`(build / defaultResponse / 전송 제어 헤더 무시)
-  - 응답 헤더 JSON 형식은 `{"이름": "값"}` (요청 로그의 `{"이름": ["값"]}`과 다름 — 사용자가 직접 입력하는 값이라 단순하게)
-  - 다음: 3-3 컨트롤러에서 `rule.map(responseBuilder::build).orElseGet(responseBuilder::defaultResponse)`로 연결, 컨트롤러의 `DEFAULT_RESPONSE_BODY` 삭제 → 4단계 지연 처리(트랜잭션 밖에서 대기, 가상 스레드 여부 결정) → 5단계 테스트
-  - 정리할 것: 새 파일 들여쓰기 2칸 → 4칸, `HookResponseBuilder.IGNORED_HEADERS` 이유 주석
+- 완료: REQ-HOOK-002 (설정된 응답 반환, 없으면 200 `{"ok":true}`)
+  - `ResponseRule`(기본 규칙만, priority·match_*는 P2) → `HookReceiveService.receive`가 로그 저장 후 `Optional<ResponseRule>` 반환 → 컨트롤러가 `HookResponseBuilder`로 응답 생성
+  - 응답 헤더 JSON 형식은 `{"이름": "값"}` (요청 로그의 `{"이름": ["값"]}`과 다름 — 사용자가 직접 입력하는 값이라 단순하게). 전송 제어 헤더(Content-Length 등)는 무시.
+  - 지연(`delayMs`)은 트랜잭션이 끝난 뒤 컨트롤러에서 `Thread.sleep` → 로그는 바로 보이고 DB 커넥션을 붙잡지 않는다.
+  - 가상 스레드 사용(`spring.threads.virtual.enabled: true`). 실행 시 요청 스레드 이름이 `tomcat-handler-N`이면 켜진 것(MockMvc 테스트로는 확인 불가).
+- 다음 작업: REQ-LOG-002 (요청 목록 최신순 커서 조회)
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
