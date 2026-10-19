@@ -1,6 +1,7 @@
 package com.hooklens.log;
 
 import com.hooklens.global.response.ApiResponse;
+import com.hooklens.log.dto.RequestLogDetail;
 import com.hooklens.log.dto.RequestLogPage;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -32,5 +33,14 @@ public class RequestLogController {
             @Min(value = 1, message = "size는 1~100 사이여야 합니다.")
             @Max(value = 100, message = "size는 1~100 사이여야 합니다.") int size) {
         return ApiResponse.ok(requestLogService.getPage(slug, anonymousToken, cursor, size));
+    }
+
+    /** 요청 상세 조회 (REQ-LOG-003). 남의 엔드포인트 요청 id면 404 */
+    @GetMapping("/{requestId}")
+    public ApiResponse<RequestLogDetail> detail(
+            @PathVariable String slug,
+            @PathVariable Long requestId,
+            @RequestHeader(value = "X-Anonymous-Token", required = false) String anonymousToken) {
+        return ApiResponse.ok(requestLogService.getDetail(slug, anonymousToken, requestId));
     }
 }
