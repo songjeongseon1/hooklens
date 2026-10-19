@@ -26,7 +26,12 @@
   - 응답 헤더 JSON 형식은 `{"이름": "값"}` (요청 로그의 `{"이름": ["값"]}`과 다름 — 사용자가 직접 입력하는 값이라 단순하게). 전송 제어 헤더(Content-Length 등)는 무시.
   - 지연(`delayMs`)은 트랜잭션이 끝난 뒤 컨트롤러에서 `Thread.sleep` → 로그는 바로 보이고 DB 커넥션을 붙잡지 않는다.
   - 가상 스레드 사용(`spring.threads.virtual.enabled: true`). 실행 시 요청 스레드 이름이 `tomcat-handler-N`이면 켜진 것(MockMvc 테스트로는 확인 불가).
-- 다음 작업: REQ-LOG-002 (요청 목록 최신순 커서 조회)
+- 완료: REQ-LOG-002 (요청 목록 최신순 커서 조회 `GET /api/endpoints/{slug}/requests?cursor=&size=`)
+  - 관리 API 인증: `EndpointService.getOwnedBySlug(slug, token)` — 토큰 없음 401, 틀림 403, 이후 관리 API는 모두 이걸 쓴다. 비교는 `MessageDigest.isEqual`(타이밍 공격 방지).
+  - 커서: `size + 1`개 조회해 다음 페이지 여부 판단(COUNT 없음), 첫 페이지는 cursor = `Long.MAX_VALUE`. size 1~100(기본 20).
+  - `HandlerMethodValidationException`(`@RequestParam` 검증)·`MethodArgumentTypeMismatchException`(타입 불일치)도 400 `INVALID_INPUT`으로 처리.
+  - 목록은 요약만(`RequestLogSummary`), 헤더·바디는 상세(REQ-LOG-003)에서.
+- 다음 작업: REQ-LOG-003 (요청 상세)
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
