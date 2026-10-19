@@ -39,4 +39,19 @@ public class AnonymousTokenProvider {
             throw new IllegalStateException("SHA-256을 사용할 수 없습니다.", e);
         }
     }
+
+    /**
+     * 받은 토큰이 저장된 해시와 같은지 확인한다.
+     * equals는 다른 글자를 만나면 바로 멈춰서 응답 시간으로 몇 글자가 맞았는지 추측할 수 있다(타이밍 공격).
+     * MessageDigest.isEqual은 항상 끝까지 비교하므로 equals로 바꾸지 않는다.
+     * 저장된 해시가 없으면(회원 엔드포인트) 항상 false.
+     */
+    public boolean matches(String token, String storedHash) {
+        if (token == null || storedHash == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                hash(token).getBytes(StandardCharsets.UTF_8),
+                storedHash.getBytes(StandardCharsets.UTF_8));
+    }
 }
