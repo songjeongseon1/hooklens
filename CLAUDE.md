@@ -31,7 +31,11 @@
   - 커서: `size + 1`개 조회해 다음 페이지 여부 판단(COUNT 없음), 첫 페이지는 cursor = `Long.MAX_VALUE`. size 1~100(기본 20).
   - `HandlerMethodValidationException`(`@RequestParam` 검증)·`MethodArgumentTypeMismatchException`(타입 불일치)도 400 `INVALID_INPUT`으로 처리.
   - 목록은 요약만(`RequestLogSummary`), 헤더·바디는 상세(REQ-LOG-003)에서.
-- 다음 작업: REQ-LOG-003 (요청 상세)
+- 완료: REQ-LOG-003 (요청 상세 `GET /api/endpoints/{slug}/requests/{requestId}`)
+  - 헤더는 Map으로 바꿔 JSON 객체로, 쿼리는 원본 문자열 그대로(화면에서 URLSearchParams).
+  - IDOR 방어: `findByIdAndEndpointId`로 "id + 내 엔드포인트" 조건을 쿼리에 넣는다. 남의 요청 id면 403이 아닌 404 `REQUEST_NOT_FOUND`(존재 여부 숨김).
+- 1주차 백엔드 범위(EP-001·002, HOOK-001·002, LOG-002·003) 완료.
+- 다음 작업: 2주차 — REQ-LOG-001 (SSE 실시간 반영). 시작 전 `프론트엔드 규칙 > 미리 알아둘 것`의 SSE 인증 결정 확인.
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 

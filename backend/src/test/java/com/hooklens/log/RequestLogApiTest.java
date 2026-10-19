@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -141,6 +142,69 @@ class RequestLogApiTest {
                         .param(name, value))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("INVALID_INPUT"));
+    }
+    @Test
+    void 남의_엔드포인트_요청_id로는_상세를_볼_수_없다() throws Exception {
+        // 내 slug + 내 토큰이라 주인 확인은 통과하지만, 요청 id가 남의 것이면 404 (IDOR 방어)
+        Endpoint mine = saveEndpoint();
+        Endpoint other = saveEndpoint();
+        Long otherRequestId = saveLogs(other, 1).getFirst();
+
+        mockMvc.perform(get("/api/endpoints/" + mine.getSlug() + "/requests/" + otherRequestId)
+                        .header("X-Anonymous-Token", TOKEN))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error.code").value("REQUEST_NOT_FOUND"));
+    }
+
+    @Test
+    void 상세는_헤더를_객체로_주고_쿼리와_바디까지_모두_보여준다() throws Exception {
+        // given: 헤더(같은 이름 두 번)·쿼리·바디가 있는 요청 하나
+        Endpoint endpoint = saveEndpoint();
+        String body = "{\"orderId\":\"ORD-1001\"}";
+        CapturedRequest captured = new CapturedRequest(
+                "POST", "/payments", "source=toss&retry=0",
+                "{\"Content-Type\":[\"application/json\"],\"X-Multi\":[\"first\",\"second\"]}",
+                body, "application/json", "203.0.113.7", body.length());
+        Long requestId = requestLogRepository.save(
+                RequestLog.of(endpoint, captured, LocalDateTime.now(clock))).getId();
+
+        // when & then: 모든 값이 그대로 나오고, 헤더는 문자열이 아니라 객체
+        mockMvc.perform(get("/api/endpoints/" + endpoint.getSlug() + "/requests/" + requestId)
+                        .header("X-Anonymous-Token", TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.requestId").value(requestId))
+                .andExpect(jsonPath("$.data.method").value("POST"))
+                .andExpect(jsonPath("$.data.path").value("/payments"))
+                .andExpect(jsonPath("$.data.queryString").value("source=toss&retry=0"))
+                .andExpect(jsonPath("$.data.headers['Content-Type'][0]").value("application/json"))
+                .andExpect(jsonPath("$.data.headers['X-Multi'][0]").value("first"))
+                .andExpect(jsonPath("$.data.headers['X-Multi'][1]").value("second"))
+                .andExpect(jsonPath("$.data.body").value(body))
+                .andExpect(jsonPath("$.data.contentType").value("application/json"))
+                .andExpect(jsonPath("$.data.ip").value("203.0.113.7"))
+                .andExpect(jsonPath("$.data.sizeBytes").value(body.length()))
+                .andExpect(jsonPath("$.data.receivedAt").value(endsWith("+09:00")));
+    }
+
+    @Test
+    void 없는_요청_id면_404_REQUEST_NOT_FOUND() throws Exception {
+        Endpoint endpoint = saveEndpoint();
+
+        mockMvc.perform(get("/api/endpoints/" + endpoint.getSlug() + "/requests/" + Long.MAX_VALUE)
+                        .header("X-Anonymous-Token", TOKEN))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error.code").value("REQUEST_NOT_FOUND"));
+    }
+
+    @Test
+    void 상세도_토큰이_틀리면_403_FORBIDDEN_ENDPOINT() throws Exception {
+        Endpoint endpoint = saveEndpoint();
+        Long requestId = saveLogs(endpoint, 1).getFirst();
+
+        mockMvc.perform(get("/api/endpoints/" + endpoint.getSlug() + "/requests/" + requestId)
+                        .header("X-Anonymous-Token", "someone-elses-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("FORBIDDEN_ENDPOINT"));
     }
 
     /** TOKEN으로 관리할 수 있는 비회원 엔드포인트 */
