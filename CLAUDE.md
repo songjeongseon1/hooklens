@@ -35,7 +35,12 @@
   - 헤더는 Map으로 바꿔 JSON 객체로, 쿼리는 원본 문자열 그대로(화면에서 URLSearchParams).
   - IDOR 방어: `findByIdAndEndpointId`로 "id + 내 엔드포인트" 조건을 쿼리에 넣는다. 남의 요청 id면 403이 아닌 404 `REQUEST_NOT_FOUND`(존재 여부 숨김).
 - 1주차 백엔드 범위(EP-001·002, HOOK-001·002, LOG-002·003) 완료.
-- 다음 작업: 2주차 — REQ-LOG-001 (SSE 실시간 반영). 시작 전 `프론트엔드 규칙 > 미리 알아둘 것`의 SSE 인증 결정 확인.
+- 완료: REQ-LOG-001 백엔드 (SSE `GET /api/endpoints/{slug}/stream`, 헤더 인증은 getOwnedBySlug)
+  - `RequestStreamRegistry`: 엔드포인트 id → 연결 Set (ConcurrentHashMap, 서버 1대 메모리). 연결 직후 `event: connected`, 30초마다 `: heartbeat` 주석(@Scheduled, `SchedulingConfig`), 실패·종료·시간 초과(30분) 시 목록에서 제거.
+  - 수신 → `HookReceiveService`가 `RequestReceivedEvent`(endpointId + `RequestLogSummary`) 발행 → `RequestReceivedListener`가 `@TransactionalEventListener(AFTER_COMMIT)`로 받아 `event: request` 전송. 커밋 전 알림(상세 404)·롤백 시 유령 알림 방지.
+  - 테스트: `RequestStreamApiTest`(MockMvc, 구독·401·403), `RequestStreamE2ETest`(RANDOM_PORT + HttpClient로 실제 스트림 수신).
+  - 화면 쪽 fetch 스트림 훅은 React 단계에서 만든다.
+- 다음 작업: REQ-RES-001 (기본 응답 설정 API) → 이후 React 화면.
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
