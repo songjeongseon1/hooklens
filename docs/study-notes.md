@@ -1,7 +1,7 @@
 # HookLens 공부 노트
 
 1차 MVP를 만들면서 배운 것과 결정한 이유를 정리한 문서. 면접 준비용.
-(최종 갱신: REQ-HOOK-002 완료 시점)
+(최종 갱신: REQ-LOG-003 완료 시점 — 1주차 백엔드 완료)
 
 ## 1. 무엇을 만드나
 
@@ -25,6 +25,8 @@ POST /api/endpoints → POST /h/{slug}/... → request_log 저장 → 규칙대�
 | REQ-EP-002 | 비회원 우체통은 24시간 뒤 문 닫기 (그 뒤엔 410) | 초기 커밋 |
 | REQ-HOOK-001 | 우체통에 들어온 편지를 그대로 보관 | #1 |
 | REQ-HOOK-002 | 편지를 받으면 정해 둔 답장 보내기 (지연 가능) | #2 |
+| REQ-LOG-002 | 받은 편지 목록 (최신순, 20개씩) | #3 |
+| REQ-LOG-003 | 편지 하나 자세히 보기 | #4 |
 
 ## 3. 기능별 정리
 
@@ -54,6 +56,41 @@ POST /api/endpoints → POST /h/{slug}/... → request_log 저장 → 규칙대�
 ```
 - 응답 헤더 JSON은 `{"이름": "값"}` (요청 로그는 `{"이름": ["값"]}`). 사용자가 직접 입력하는 값이라 단순하게.
 - `Content-Length`, `Transfer-Encoding` 같은 전송 제어 헤더는 무시.
+
+### ⑤ 요청 목록 (REQ-LOG-002)
+**주인 확인** — `EndpointService.getOwnedBySlug(slug, token)`, 이후 모든 관리 API가 재사용
+```
+토큰이 없다         → 401 UNAUTHORIZED     ("누구세요?")
+엔드포인트가 없다    → 404 / 만료면 410
+토큰 해시가 다르다   → 403 FORBIDDEN        ("당신 것이 아니에요")
+```
+- 해시 비교는 `equals`가 아니라 `MessageDigest.isEqual` → 항상 끝까지 비교해 타이밍 공격 방지.
+
+**커서 페이징** — `RequestLogService.getPage`
+```
+요청: size=20, cursor=81
+SQL:  WHERE endpoint_id = ? AND request_id < 81 ORDER BY request_id DESC LIMIT 21
+결과: 21개면 → 20개만 주고 nextCursor = 20번째 id / 20개 이하면 → nextCursor = null
+```
+- 오프셋 대신 커서: 보는 중에 새 웹훅이 들어와도 페이지가 밀리지 않고(중복·누락 없음), 뒤 페이지도 인덱스로 바로 찾아 빠르다.
+- size+1개 조회: COUNT 쿼리 없이 다음 페이지 여부를 안다.
+- `Pageable`(OFFSET) 대신 `Limit`. 첫 페이지는 cursor = `Long.MAX_VALUE`.
+- `size=0`, `cursor=abc`가 500이 되지 않게 `HandlerMethodValidationException`·`MethodArgumentTypeMismatchException`을 400으로 처리.
+
+### ⑥ 요청 상세 (REQ-LOG-003)
+**IDOR 방어** — `findByIdAndEndpointId`
+```
+공격: 내 slug + 내 토큰으로 /requests/999 (999번은 남의 로그)
+  getOwnedBySlug → 통과 (slug는 내 것)  ← 이것만으로는 못 막는다
+  findByIdAndEndpointId(999, 내 엔드포인트 id) → 결과 없음 → 404
+```
+- 남의 것도 403이 아니라 404 → 존재 여부 자체를 숨긴다.
+- 조건을 자바 코드가 아니라 쿼리에 넣어, 남의 데이터는 애초에 조회되지 않게 한다.
+
+**DTO와 record**
+- 엔티티(DB 모양)를 그대로 내보내지 않고 DTO(화면 모양)로: 헤더 문자열 → 객체, 시간에 +09:00, LAZY 필드 오류 방지, API 모양 고정.
+- DTO는 값만 담는 상자라 `record`(생성자·getter·equals 자동, 불변). 엔티티는 JPA가 빈 생성자로 만든 뒤 값을 채워야 해서 record 불가.
+- record 생성자는 필드 순서 그대로 받는다. 같은 타입끼리 순서가 바뀌면 컴파일러가 못 잡는다 → 테스트가 잡는다.
 
 ## 4. 개념 사전
 
@@ -91,6 +128,13 @@ POST /api/endpoints → POST /h/{slug}/... → request_log 저장 → 규칙대�
 7. **SSE 인증은? (REQ-LOG-001 예정)**
    `EventSource`는 커스텀 헤더를 못 보낸다 → `fetch` 스트림으로 연결해 `X-Anonymous-Token` 헤더 인증을 그대로 쓴다. 쿼리 파라미터는 토큰이 Nginx 로그·브라우저 기록에 남고, 일회용 티켓은 저장소·재연결 처리가 필요하다.
 
+8. **401과 403의 차이는?**
+   401은 인증 정보가 없음(누군지 모름), 403은 인증은 됐지만 권한 없음. 토큰이 없으면 401, 남의 토큰이면 403.
+9. **커서 페이징을 왜 썼나?**
+   새 웹훅이 계속 들어오는 서비스라 오프셋은 페이지가 밀려 중복·누락이 생기고, 뒤로 갈수록 느리다. size+1개 조회로 COUNT 없이 다음 페이지를 판단한다.
+10. **IDOR을 어떻게 막았나?**
+    주인 확인은 "slug가 내 것인가"만 본다. 요청 id는 "id + 내 엔드포인트" 조건으로 쿼리해서 남의 것은 조회조차 안 되게 했고, 존재 여부를 숨기려고 404로 응답한다.
+
 ## 6. 작업 방식
 - **브랜치 → 커밋 → PR → merge**: 기능 하나마다 브랜치, PR로 main에 합친다.
 - **CLAUDE.md**: 규칙과 진행 상황. 새 세션에서도 이걸 읽고 이어간다.
@@ -100,8 +144,6 @@ POST /api/endpoints → POST /h/{slug}/... → request_log 저장 → 규칙대�
 ## 7. 앞으로 (1차 MVP)
 | 순서 | 기능 | 쉽게 말하면 |
 | --- | --- | --- |
-| 다음 | REQ-LOG-002 | 받은 편지 목록을 최신순으로 20개씩 (커서 페이지네이션) |
-| | REQ-LOG-003 | 편지 하나 자세히 보기 |
-| 2주차 | REQ-LOG-001 | 새 편지가 오면 화면에 실시간 표시 (SSE) |
+| 다음 | REQ-LOG-001 | 새 편지가 오면 화면에 실시간 표시 (SSE) |
 | | REQ-RES-001 | 답장 내용 설정 API |
 | | React 화면, EC2 배포 | 화면 만들고 인터넷에 올리기 |
