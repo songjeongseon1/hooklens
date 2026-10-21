@@ -40,7 +40,11 @@
   - 수신 → `HookReceiveService`가 `RequestReceivedEvent`(endpointId + `RequestLogSummary`) 발행 → `RequestReceivedListener`가 `@TransactionalEventListener(AFTER_COMMIT)`로 받아 `event: request` 전송. 커밋 전 알림(상세 404)·롤백 시 유령 알림 방지.
   - 테스트: `RequestStreamApiTest`(MockMvc, 구독·401·403), `RequestStreamE2ETest`(RANDOM_PORT + HttpClient로 실제 스트림 수신).
   - 화면 쪽 fetch 스트림 훅은 React 단계에서 만든다.
-- 다음 작업: REQ-RES-001 (기본 응답 설정 API) → 이후 React 화면.
+- 완료: REQ-RES-001 (기본 응답 설정 `GET`·`PUT /api/endpoints/{slug}/response`)
+  - PUT = upsert(있으면 `ResponseRule.update`로 변경 감지 UPDATE, 없으면 INSERT), 멱등. 설정 전 GET은 기본 응답 + `custom: false`.
+  - 검증: statusCode 100~599, delayMs 0~5000, body 20,000자, 헤더 20개. 헤더 주입 방지 — 이름은 허용 문자 정규식(화이트리스트), 값은 `\r`·`\n` 금지 → 400 + 어느 헤더인지 메시지(`BusinessException(ErrorCode, message)` 추가).
+  - 한계: 같은 엔드포인트에 처음 저장하는 요청이 동시에 오면 기본 규칙이 두 개 생길 수 있음(P2에서 잠금·제약).
+- **백엔드 P0 전부 완료.** 다음: React 화면 → EC2 배포 (목표: 2026-10-23까지 배포).
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 

@@ -64,4 +64,16 @@ public class ResponseRule {
         rule.delayMs = delayMs;
         return rule;
     }
+
+    /**
+     * 응답 설정을 통째로 바꾼다 (REQ-RES-001).
+     * save()를 다시 부르지 않아도 트랜잭션이 끝날 때 JPA가 바뀐 값을 감지해 UPDATE한다(변경 감지).
+     * setter 대신 의미가 드러나는 메서드 하나만 열어 둔다 → endpoint·isDefault처럼 바뀌면 안 되는 값은 못 바꾼다.
+     */
+    public void update(int statusCode, String responseHeaders, String responseBody, int delayMs) {
+        this.statusCode = statusCode;           // 새 상태 코드
+        this.responseHeaders = responseHeaders; // 새 헤더 JSON 문자열 ({"이름": "값"}), 없으면 null
+        this.responseBody = responseBody;       // 새 바디, 없으면 null
+        this.delayMs = delayMs;                 // 새 지연 시간(ms)
+    }
 }
