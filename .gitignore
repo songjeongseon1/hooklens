@@ -1,5 +1,6 @@
 # 비밀 값
 .env
+.env.prod
 *.env.local
 
 # Gradle

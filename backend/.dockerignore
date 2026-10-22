@@ -1,0 +1,6 @@
+# 이미지를 만들 때 상자에 넣지 않을 것 (빌드 찌꺼기·IDE 파일)
+build/
+.gradle/
+.idea/
+*.iml
+out/

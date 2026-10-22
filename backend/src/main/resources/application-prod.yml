@@ -1,4 +1,8 @@
-# 운영(AWS) 설정. 모든 접속 정보는 배포 시 환경 변수로 주입한다 (4주차).
+# 운영(EC2) 설정. 모든 접속 정보는 배포 시 환경 변수로 주입한다 (docker-compose.prod.yml + .env).
+server:
+  # Nginx 뒤에서 실제 접속자 IP를 얻는다: Nginx가 붙인 X-Forwarded-For로 getRemoteAddr() 값을 바꿔 준다(코드 수정 없음).
+  # 톰캣은 사설 대역(도커 내부망 172.x 등)에서 온 요청의 헤더만 믿는다 → 외부에서 위조한 헤더는 무시된다.
+  forward-headers-strategy: native
 spring:
   datasource:
     url: ${DB_URL}
@@ -6,12 +10,18 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate   # 운영에서는 테이블을 자동 변경하지 않음
+      ddl-auto: validate   # 운영에서는 테이블을 자동 변경하지 않음 (테이블은 deploy/mysql/init/01-schema.sql)
     show-sql: false
   data:
     redis:
-      host: ${REDIS_HOST}
+      # 1차 운영은 Redis를 띄우지 않는다(쓰는 기능 없음). 기본값이 없으면 환경 변수가 없을 때 앱 시작이 실패한다.
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
 hooklens:
-  base-url: ${HOOKLENS_BASE_URL}   # 예: https://hooklens.example.com
+  base-url: ${HOOKLENS_BASE_URL}   # 예: http://13.125.x.x (EC2 공인 IP)
+
+management:
+  health:
+    redis:
+      enabled: false   # Redis가 없으면 /actuator/health 전체가 DOWN이 되므로 Redis 확인만 뺀다

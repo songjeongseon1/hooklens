@@ -1,0 +1,60 @@
+# 운영용: EC2 한 대에 MySQL + 백엔드 + Nginx를 같이 띄운다. (로컬 개발용은 docker-compose.yml)
+# 실행: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# 컨테이너끼리는 서비스 이름(mysql, backend)으로 서로를 찾는다. 밖으로 열린 문은 nginx의 80번 하나뿐이다.
+
+# 프로젝트 이름: 같은 폴더의 로컬 개발용 docker-compose.yml(이름 hooklens)과 섞이지 않게 분리한다
+name: hooklens-prod
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped          # 죽거나 EC2가 재부팅돼도 자동으로 다시 켠다 (직접 멈춘 경우만 제외)
+    environment:
+      MYSQL_DATABASE: hooklens
+      MYSQL_USER: ${DB_USERNAME}     # .env.prod의 값으로 바뀐다 — 비밀번호를 이 파일에 직접 쓰지 않는다
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --performance-schema=OFF     # 내부 성능 측정 기능을 꺼서 메모리 절약 (작은 EC2용)
+    volumes:
+      - mysql-data:/var/lib/mysql                          # DB 파일은 볼륨에 → 컨테이너를 다시 만들어도 데이터가 남는다
+      - ./deploy/mysql/init:/docker-entrypoint-initdb.d:ro # 처음 시작할 때만 테이블 생성 SQL 실행 (ro = 읽기 전용)
+    healthcheck:
+      # 127.0.0.1(TCP)로 확인: 초기화 SQL을 실행하는 동안 MySQL은 네트워크를 닫은 임시 서버로 돈다
+      # → 그동안은 "아직"으로 나와야 백엔드가 너무 일찍 붙지 않는다
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # ports 없음: 인터넷에서 DB에 직접 접근할 수 없다. 백엔드만 내부 네트워크로 접근한다
+
+  backend:
+    build: ./backend                 # backend/Dockerfile로 이미지를 만든다
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod   # application-prod.yml 사용
+      # mysql = 위 서비스 이름, 3306 = MySQL 컨테이너 안의 포트
+      DB_URL: jdbc:mysql://mysql:3306/hooklens?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      HOOKLENS_BASE_URL: ${HOOKLENS_BASE_URL}  # 화면에 보여 줄 웹훅 주소의 앞부분 (EC2 공인 IP)
+      TZ: Asia/Seoul
+    mem_limit: 512m                  # Dockerfile의 MaxRAMPercentage=60 → 자바 힙 약 300MB
+    depends_on:
+      mysql:
+        condition: service_healthy   # MySQL이 healthy가 된 뒤에 켠다
+    # ports 없음: 8080은 밖에 안 연다 (Nginx만 내부 네트워크로 접근 → 보안, 호스트의 8080과 충돌 없음)
+
+  nginx:
+    build: ./frontend                # frontend/Dockerfile (React 빌드 + nginx.conf)
+    restart: unless-stopped
+    ports:
+      - "80:80"                      # 유일하게 밖으로 열린 문: EC2의 80 ↔ 컨테이너의 80
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

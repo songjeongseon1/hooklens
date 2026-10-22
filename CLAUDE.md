@@ -52,6 +52,13 @@
   - `src/hooks/useRequestStream.js`: fetch 스트림으로 SSE 수신(헤더 인증), 직접 파싱, 3초 후 재연결, 재연결 시 목록 API로 보충. 목록은 requestId로 중복 제거·정렬(`merge`).
   - React Router는 API를 확실히 아는 7.x(`~7.18.4`)로 고정(최신 8.x 아님).
   - 이 PC는 8080을 Jenkins가 쓴다 → 백엔드를 다른 포트로 띄우고 `BACKEND_URL=http://localhost:포트 npm run dev`(Vite 프록시 대상).
+- 완료: 배포 준비 (로컬에서 운영 구성 그대로 띄워 화면·발급·SSE·실제 IP·시간대 확인). 절차는 `docs/deploy.md`.
+  - `docker-compose.prod.yml`(프로젝트 이름 `hooklens-prod`): mysql(포트 비공개, 볼륨, `--performance-schema=OFF`) + backend(`backend/Dockerfile`, 포트 비공개, mem 512m) + nginx(`frontend/Dockerfile`, 80만 공개).
+  - 테이블: `deploy/mysql/init/01-schema.sql`(엔티티에서 Hibernate로 생성) — MySQL이 처음 뜰 때만 실행. **엔티티를 바꾸면 이 파일도 다시 생성**(2차엔 Flyway).
+  - `frontend/nginx.conf`: 정적 파일 + `/api`·`/h` 프록시 + stream만 `proxy_buffering off`·`proxy_read_timeout 1h` + `try_files ... /index.html`(SPA).
+  - 실제 IP: Nginx가 `X-Forwarded-For` 전달 + prod `server.forward-headers-strategy: native`. Redis는 운영에 안 띄움(`management.health.redis.enabled: false`).
+  - 운영 비밀 값은 `.env.prod`(Git 제외), 예시는 `.env.prod.example`. EC2는 t3.micro + 스왑 2GB.
+- 다음: EC2 생성·배포(`docs/deploy.md`) → 깃허브 웹훅으로 실제 확인.
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
@@ -62,12 +69,13 @@
 - 백엔드 실행: `cd backend && ./gradlew bootRun` (기본 프로필 `local`, 루트 `.env`를 자동으로 읽음)
 - 헬스 체크: http://localhost:8080/actuator/health
 - 프론트(2주차~): `cd frontend && npm run dev`
+- 운영 구성 실행(로컬·EC2 공통): `docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build` → http://localhost (상태: `docker compose -p hooklens-prod ps`, 로그: `docker compose -p hooklens-prod logs -f backend`)
 
 ## 기술 스택
 
 - 백엔드: Java 21, Spring Boot 4, Spring Data JPA, Gradle(Groovy), Lombok, Validation, Actuator
 - 실시간: SSE (SseEmitter) — WebSocket은 이미 다른 프로젝트에서 써봤고, 단방향 푸시라 SSE 선택
-- DB: MySQL 8 (로컬은 Docker Compose, 포트 3307 / 운영은 AWS RDS)
+- DB: MySQL 8 (로컬은 Docker Compose, 포트 3307 / 운영 1차는 EC2 안 MySQL 컨테이너, RDS는 이후)
 - 캐시·제한: Redis 7 (Rate Limit, Refresh 토큰, 다중 서버용 Pub/Sub)
 - 인증: Spring Security + JWT (2차 개발에서 추가, 그 전에는 Security 의존성 넣지 않음), 비회원은 익명 토큰
 - 프론트엔드: React 19, JavaScript(ES6+), Vite 8, React Router, Axios, Tailwind CSS 4
@@ -90,7 +98,10 @@
 hooklens/
 ├── backend/            Spring Boot (패키지: com.hooklens)
 ├── frontend/           React (2주차에 생성)
-├── docker-compose.yml  MySQL, Redis
+├── docker-compose.yml       로컬 개발용 MySQL, Redis
+├── docker-compose.prod.yml  운영용 mysql + backend + nginx
+├── deploy/mysql/init/       운영 DB 초기 테이블 SQL
+├── docs/                    study-notes.md(공부 노트), deploy.md(배포 절차)
 ├── .env                비밀 값 — 절대 커밋하지 않음
 └── CLAUDE.md
 ```
