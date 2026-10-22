@@ -45,6 +45,13 @@
   - 검증: statusCode 100~599, delayMs 0~5000, body 20,000자, 헤더 20개. 헤더 주입 방지 — 이름은 허용 문자 정규식(화이트리스트), 값은 `\r`·`\n` 금지 → 400 + 어느 헤더인지 메시지(`BusinessException(ErrorCode, message)` 추가).
   - 한계: 같은 엔드포인트에 처음 저장하는 요청이 동시에 오면 기본 규칙이 두 개 생길 수 있음(P2에서 잠금·제약).
 - **백엔드 P0 전부 완료.** 다음: React 화면 → EC2 배포 (목표: 2026-10-23까지 배포).
+- 진행 방식 변경(10/22): 프론트·배포는 Claude가 작성하고 코드 주석·줄별 설명으로 이해하는 방식. 배포 DB는 RDS 대신 **EC2 안 MySQL 컨테이너**(나중에 접속 주소만 바꿔 RDS 이전 가능).
+- 완료: 프론트 MVP (`frontend/`, 브라우저로 발급→실시간 수신→상세→응답 설정→웹훅 반영까지 확인)
+  - 화면: `/` HomePage(발급, 내 엔드포인트 목록), `/e/:slug` EndpointPage(URL 복사, 요청 목록+상세, 응답 설정 탭)
+  - `src/api/client.js`: axios 인스턴스, 응답 인터셉터로 `{success,data,error}`에서 data 추출·error.message로 Error. `tokenStore.js`: localStorage에 엔드포인트·토큰 보관.
+  - `src/hooks/useRequestStream.js`: fetch 스트림으로 SSE 수신(헤더 인증), 직접 파싱, 3초 후 재연결, 재연결 시 목록 API로 보충. 목록은 requestId로 중복 제거·정렬(`merge`).
+  - React Router는 API를 확실히 아는 7.x(`~7.18.4`)로 고정(최신 8.x 아님).
+  - 이 PC는 8080을 Jenkins가 쓴다 → 백엔드를 다른 포트로 띄우고 `BACKEND_URL=http://localhost:포트 npm run dev`(Vite 프록시 대상).
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
