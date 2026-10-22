@@ -22,7 +22,7 @@ import java.util.Set;
 public class HookResponseBuilder {
 
     /** 설정된 응답이 없을 때의 기본 응답 바디 */
-    static final String DEFAULT_RESPONSE_BODY = "{\"ok\":true}";
+    public static final String DEFAULT_RESPONSE_BODY = "{\"ok\":true}";
 
     /**
      * 서버(톰캣)가 직접 관리하는 전송 제어 헤더. 사용자가 설정해도 무시한다.

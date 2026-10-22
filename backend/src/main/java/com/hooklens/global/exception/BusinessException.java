@@ -15,4 +15,13 @@ public class BusinessException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
+
+    /**
+     * 상황에 맞는 메시지를 직접 넣을 때 (오버로딩: 이름은 같고 파라미터만 다른 생성자).
+     * 예: throw new BusinessException(ErrorCode.INVALID_INPUT, "헤더 값에 줄바꿈을 넣을 수 없습니다: X-Custom");
+     */
+    public BusinessException(ErrorCode errorCode, String message) {
+        super(message);             // 부모(RuntimeException)에 메시지 전달 → getMessage()로 꺼낼 수 있다
+        this.errorCode = errorCode; // 상태 코드·에러 코드는 그대로 ErrorCode에서
+    }
 }
