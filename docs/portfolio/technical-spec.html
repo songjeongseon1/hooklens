@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>HookLens 프로젝트 기술서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 18mm 17mm 18mm 17mm;
+    @bottom-right { content: counter(page); font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 8.5pt; color: #888; }
+    @bottom-left { content: "HookLens 프로젝트 기술서 · github.com/songjeongseon1/hooklens"; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 8.5pt; color: #888; }
+  }
+  @page :first { @bottom-left { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 9.6pt; line-height: 1.68; color: #1f1f1f; margin: 0; word-break: keep-all; }
+  h1 { font-size: 22pt; margin: 0 0 2mm; letter-spacing: -0.3px; }
+  h2 { font-size: 13pt; margin: 9mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1.4px solid #1f1f1f; break-after: avoid; }
+  h3 { font-size: 10.6pt; margin: 6mm 0 1.5mm; break-after: avoid; }
+  h2 .no { color: #2b4a8b; margin-right: 2mm; }
+  p { margin: 0 0 2.2mm; }
+  ul { margin: 0 0 2.2mm; padding-left: 4.5mm; }
+  li { margin-bottom: 0.8mm; }
+  code, .mono { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8.4pt; }
+  code { background: #f2f2f0; padding: 0.2mm 1mm; border-radius: 2px; }
+  pre { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8pt; line-height: 1.5; background: #f6f6f4; border-left: 2px solid #c9c9c4; padding: 2.5mm 3.5mm; margin: 0 0 3mm; white-space: pre; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; font-size: 8.9pt; break-inside: avoid; }
+  th, td { border-top: 1px solid #d8d8d4; padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #f4f4f1; font-weight: 500; }
+  tr:last-child td { border-bottom: 1px solid #d8d8d4; }
+  .meta { display: grid; grid-template-columns: 22mm 1fr; gap: 0.6mm 4mm; font-size: 9pt; margin: 5mm 0 0; padding: 4mm 0; border-top: 1px solid #1f1f1f; border-bottom: 1px solid #d8d8d4; }
+  .meta dt { color: #666; } .meta dd { margin: 0; }
+  .lead { font-size: 10.6pt; color: #333; margin-top: 1mm; }
+  figure { margin: 2mm 0 4mm; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #d8d8d4; display: block; }
+  figcaption { font-size: 8.3pt; color: #666; margin-top: 1.2mm; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
+  .two figure img { height: 52mm; object-fit: cover; object-position: top; }
+  .issue { break-inside: avoid; margin-bottom: 5mm; }
+  .issue h3 { margin-top: 5mm; }
+  .issue dl { display: grid; grid-template-columns: 17mm 1fr; gap: 1mm 3mm; margin: 0; }
+  .issue dt { color: #2b4a8b; font-weight: 500; }
+  .issue dd { margin: 0; }
+  .note { color: #555; font-size: 8.8pt; }
+  .pb { break-before: page; }
+  a.gh { color: #2b4a8b; text-decoration: none; font-weight: 500; }
+  .ghline { display: inline-block; margin-top: 3mm; padding: 1.6mm 4mm; border: 1.3px solid #2b4a8b; font-size: 10.5pt; }
+  .ghline span { color: #666; font-size: 8.5pt; letter-spacing: 1px; margin-right: 2.5mm; }
+  svg text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+</style>
+</head>
+<body>
+
+<h1>HookLens</h1>
+<p class="lead">웹훅을 받아서 실시간으로 보여주고, 정해 둔 응답을 돌려주는 웹훅 디버거</p>
+<div class="ghline"><span>GITHUB</span><a class="gh" href="https://github.com/songjeongseon1/hooklens">https://github.com/songjeongseon1/hooklens</a></div>
+
+<dl class="meta">
+  <dt>기간</dt><dd>2026.10.13 ~ 2026.10.22 (10일, 커밋 26개 · PR 8개)</dd>
+  <dt>인원</dt><dd>1인 — 기획, 백엔드, 프론트엔드, 배포 구성</dd>
+  <dt>저장소</dt><dd><a class="gh" href="https://github.com/songjeongseon1/hooklens">https://github.com/songjeongseon1/hooklens</a></dd>
+  <dt>기술</dt><dd>Java 21, Spring Boot 4.0, Spring Data JPA, MySQL 8 / React 19, Vite 8, Tailwind CSS 4 / JUnit 5, Testcontainers / Docker Compose, Nginx</dd>
+  <dt>규모</dt><dd>백엔드 1,654줄(38파일), 테스트 1,260줄(59개), 프론트엔드 742줄(16파일)</dd>
+</dl>
+
+<h2><span class="no">1</span>개요</h2>
+<h3>배경</h3>
+<p>결제(토스페이먼츠 등)나 깃허브 연동을 만들 때는 외부 서비스가 우리 서버로 보내는 웹훅을 받아서 처리하는 코드를 짜야 한다. 이때 반복해서 막히는 지점이 세 가지 있었다.</p>
+<ul>
+  <li>실제로 어떤 헤더와 바디가 오는지 문서만으로는 확신하기 어렵다.</li>
+  <li>외부 서비스는 인터넷에 있어서 개발 중인 PC(localhost)로는 웹훅을 보낼 수 없다.</li>
+  <li>우리 서버가 실패하거나 느리게 응답할 때 상대가 재전송하는지 미리 확인할 방법이 없다.</li>
+</ul>
+<p>그래서 인터넷에서 접근 가능한 주소를 발급하고, 들어온 요청을 가공하지 않고 기록해 화면에 바로 띄우며, 응답 코드와 지연을 바꿔 실패 상황을 재현할 수 있는 도구를 만들었다. webhook.site, RequestBin과 같은 종류다.</p>
+
+<h3>목표와 범위</h3>
+<p>2주 안에 MVP(P0 8개)를 완성하고 배포 구성까지 마치는 것을 목표로 잡았다. 회원·요청 제한·리플레이는 2차로 미뤘다.</p>
+<table>
+  <tr><th style="width:24%">요구사항</th><th>내용</th></tr>
+  <tr><td>EP-001, EP-002</td><td>비회원 엔드포인트 발급, 24시간 후 만료(이후 수신 시 410)</td></tr>
+  <tr><td>HOOK-001, HOOK-002</td><td>모든 메서드·하위 경로 수신 및 원본 저장, 설정된 응답 반환(없으면 200 <code>{"ok":true}</code>)</td></tr>
+  <tr><td>LOG-001, 002, 003</td><td>SSE 실시간 반영, 최신순 커서 목록, 상세(쿼리·헤더·바디)</td></tr>
+  <tr><td>RES-001</td><td>기본 응답 설정(상태 코드, 헤더, 바디, 지연 0~5초)</td></tr>
+</table>
+
+<h2><span class="no">2</span>화면과 기능</h2>
+<figure>
+  <img src="../images/requests.jpg">
+  <figcaption>엔드포인트 화면. 결제 웹훅 3건이 새로고침 없이 들어왔고, 재전송 요청(<code>retry=1</code>)의 헤더와 바디를 보고 있다.</figcaption>
+</figure>
+<div class="two">
+  <figure><img src="../images/home.jpg"><figcaption>홈. 이름만 넣으면 주소가 발급되고, 이 브라우저에서 만든 엔드포인트가 쌓인다.</figcaption></figure>
+  <figure><img src="../images/response-settings.jpg"><figcaption>응답 설정. 503 + 3초 지연으로 바꾸면 다음 웹훅부터 그대로 응답한다.</figcaption></figure>
+</div>
+<ul>
+  <li>로그인 없이 쓰는 대신, 발급 응답에서 한 번만 주는 익명 토큰을 브라우저(localStorage)에 보관하고 관리 API마다 <code>X-Anonymous-Token</code> 헤더로 보낸다.</li>
+  <li>요청은 메서드·경로·쿼리·헤더(같은 이름이 여러 번 오면 모두)·바디·IP·수신 시각을 원본 그대로 남긴다.</li>
+</ul>
+
+<h2 class="pb"><span class="no">3</span>시스템 구조</h2>
+<svg viewBox="0 0 680 210" width="100%" style="margin: 1mm 0 3mm">
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker></defs>
+  <g font-size="11" fill="#1f1f1f">
+    <rect x="10" y="20" width="120" height="44" fill="#fff" stroke="#555"/><text x="70" y="40" text-anchor="middle">결제사 · 깃허브</text><text x="70" y="55" text-anchor="middle" font-size="9.5" fill="#666">웹훅 발신</text>
+    <rect x="10" y="130" width="120" height="44" fill="#fff" stroke="#555"/><text x="70" y="150" text-anchor="middle">브라우저 (React)</text><text x="70" y="165" text-anchor="middle" font-size="9.5" fill="#666">목록 · 상세 · 설정</text>
+    <rect x="200" y="70" width="120" height="60" fill="#f4f4f1" stroke="#555"/><text x="260" y="95" text-anchor="middle">Nginx :80</text><text x="260" y="111" text-anchor="middle" font-size="9.5" fill="#666">정적 파일 · 프록시</text>
+    <rect x="390" y="55" width="160" height="90" fill="#f4f4f1" stroke="#555"/><text x="470" y="78" text-anchor="middle">Spring Boot</text>
+    <text x="470" y="97" text-anchor="middle" font-size="9.5" fill="#444">수신 → 저장 → 커밋</text><text x="470" y="112" text-anchor="middle" font-size="9.5" fill="#444">→ 이벤트 → SSE 전송</text><text x="470" y="127" text-anchor="middle" font-size="9.5" fill="#444">가상 스레드</text>
+    <rect x="600" y="78" width="70" height="44" fill="#fff" stroke="#555"/><text x="635" y="104" text-anchor="middle">MySQL</text>
+  </g>
+  <g stroke="#555" stroke-width="1.2" fill="none" marker-end="url(#a)">
+    <path d="M130,42 L198,86"/><path d="M130,152 L198,116"/><path d="M320,100 L388,100"/><path d="M550,100 L598,100"/>
+  </g>
+  <path d="M390,138 C330,190 200,190 132,162" stroke="#2b4a8b" stroke-width="1.2" stroke-dasharray="4 3" fill="none" marker-end="url(#a)"/>
+  <text x="262" y="200" text-anchor="middle" font-size="9.5" fill="#2b4a8b">SSE (fetch 스트림, 헤더 인증)</text>
+  <text x="165" y="58" font-size="9" fill="#666">POST /h/{slug}</text><text x="150" y="128" font-size="9" fill="#666">/ , /api</text>
+</svg>
+<ul>
+  <li>패키지는 기능 단위(<code>endpoint</code>, <code>hook</code>, <code>log</code>, <code>response</code>, <code>global</code>)로 나눴다.</li>
+  <li>관리 API는 <code>{ success, data, error: { code, message } }</code>로 응답하고, 에러 코드는 <code>ErrorCode</code> enum 한 곳에서 관리한다. 웹훅 수신(<code>/h/**</code>)만은 사용자가 정한 응답을 그대로 돌려준다.</li>
+  <li>모든 계층의 시간을 Asia/Seoul로 맞추고 API에는 오프셋을 붙여 내보낸다(<code>2026-10-22T17:11:52+09:00</code>).</li>
+</ul>
+
+<h3>데이터 모델</h3>
+<table>
+  <tr><th style="width:18%">테이블</th><th>주요 컬럼</th><th style="width:30%">비고</th></tr>
+  <tr><td>endpoint</td><td>slug(UK, 영숫자 10자), anonymous_token_hash(SHA-256), expires_at, member_id(NULL=비회원)</td><td>외부에는 숫자 id 대신 slug만 노출</td></tr>
+  <tr><td>request_log</td><td>method, path, query_string, headers(JSON), body(MEDIUMTEXT), ip, size_bytes, received_at</td><td>인덱스 (endpoint_id, request_id DESC)</td></tr>
+  <tr><td>response_rule</td><td>is_default, status_code, response_headers(JSON), response_body, delay_ms</td><td>1차는 엔드포인트당 기본 규칙 1개</td></tr>
+</table>
+<p class="note">엔드포인트가 지워지면 로그와 응답 규칙은 FK의 ON DELETE CASCADE로 함께 지워진다.</p>
+
+<h3>API</h3>
+<table>
+  <tr><th style="width:12%">메서드</th><th style="width:44%">경로</th><th>설명</th></tr>
+  <tr><td>POST</td><td class="mono">/api/endpoints</td><td>발급. 익명 토큰은 이 응답에서만 제공</td></tr>
+  <tr><td>ANY</td><td class="mono">/h/{slug}/**</td><td>웹훅 수신. 없는 slug 404, 만료 410</td></tr>
+  <tr><td>GET</td><td class="mono">/api/endpoints/{slug}/requests</td><td>목록. <code>cursor</code>, <code>size</code>(1~100)</td></tr>
+  <tr><td>GET</td><td class="mono">/api/endpoints/{slug}/requests/{id}</td><td>상세. 헤더는 JSON 객체로 변환</td></tr>
+  <tr><td>GET</td><td class="mono">/api/endpoints/{slug}/stream</td><td>SSE. <code>connected</code>, <code>request</code> 이벤트, 30초 하트비트</td></tr>
+  <tr><td>GET/PUT</td><td class="mono">/api/endpoints/{slug}/response</td><td>응답 설정 조회 / 저장(upsert)</td></tr>
+</table>
+
+<h2 class="pb"><span class="no">4</span>기술적으로 고민한 부분</h2>
+
+<div class="issue">
+<h3>4.1 SSE 인증 — EventSource를 쓰지 않은 이유</h3>
+<dl>
+  <dt>문제</dt><dd>관리 API는 모두 <code>X-Anonymous-Token</code> 헤더로 인증하는데, 브라우저의 <code>EventSource</code>는 커스텀 헤더를 보낼 수 없다.</dd>
+  <dt>검토</dt><dd>쿼리 파라미터로 토큰 전달 → Nginx 접근 로그와 브라우저 기록에 24시간짜리 토큰이 남는다. 일회용 티켓 발급 → 티켓 저장소와 만료 처리, 재연결 때마다 재발급이 필요하다. 쿠키 → 인증 방식이 둘로 갈리고 CSRF를 따로 고려해야 한다.</dd>
+  <dt>선택</dt><dd><code>fetch</code>로 스트림을 열고 <code>response.body.getReader()</code>로 직접 읽는 훅을 만들었다. 네트워크 조각은 줄 단위로 오지 않으므로 버퍼에 모아 줄로 자르고(마지막 덜 온 조각은 다음 조각과 합침), 빈 줄에서 메시지 하나를 완성하고, <code>:</code>로 시작하는 하트비트는 버린다.</dd>
+  <dt>결과</dt><dd>인증 방식이 하나로 통일됐고 백엔드는 다른 관리 API와 똑같이 헤더를 읽는다. 대신 EventSource가 해 주던 재연결을 직접 구현했다 — 스트림이 끝나면 3초 뒤 다시 연결하고, 끊긴 사이 놓친 요청은 목록 API로 다시 받아 requestId로 중복을 없앤다. 401·403·410은 재시도해도 같으므로 다시 연결하지 않는다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.2 알림은 커밋이 끝난 뒤에</h3>
+<dl>
+  <dt>문제</dt><dd>웹훅을 저장하면서 바로 SSE로 알리면, 화면이 알림을 받고 상세를 조회했을 때 아직 커밋 전이라 404가 날 수 있다. 저장이 롤백되면 없는 요청을 알린 셈이 된다.</dd>
+  <dt>선택</dt><dd>수신 서비스는 저장 후 <code>RequestReceivedEvent</code>만 발행하고, 리스너를 <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code>로 두어 커밋이 성공했을 때만 전송한다. 이벤트에는 엔티티 대신 요약 DTO를 담았다 — 리스너는 트랜잭션 밖에서 돌기 때문에 LAZY 필드를 건드리면 예외가 난다.</dd>
+  <dt>결과</dt><dd>수신 코드는 SSE의 존재를 모른다. 서버를 여러 대로 늘려 Redis Pub/Sub로 바꿔도 수신 코드는 그대로다. 실제 포트로 서버를 띄운 E2E 테스트에서 리스너의 전송 줄을 지우면 테스트가 실패하는 것까지 확인했다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.3 지연 응답과 커넥션 풀, 가상 스레드</h3>
+<dl>
+  <dt>문제</dt><dd>응답 지연(최대 5초)을 서비스의 트랜잭션 안에서 기다리면 그동안 DB 커넥션을 잡고 있다. HikariCP 기본 풀은 10개라 지연 요청 10개면 지연과 무관한 요청까지 멈춘다. 또 기다리는 동안 톰캣 스레드(기본 200개)도 묶인다.</dd>
+  <dt>검토</dt><dd>그냥 <code>Thread.sleep</code> / <code>DeferredResult</code>와 스케줄러로 비동기 완성 / 가상 스레드. 비동기는 스레드를 안 묶지만 흐름이 복잡해진다.</dd>
+  <dt>선택</dt><dd>로그 저장과 규칙 조회까지만 트랜잭션으로 묶어 먼저 커밋하고, 대기는 컨트롤러에서 한다. 그리고 <code>spring.threads.virtual.enabled</code>로 가상 스레드를 켰다. 코드는 단순한 sleep이지만 기다리는 동안 OS 스레드를 놓아준다.</dd>
+  <dt>결과</dt><dd>지연 중에도 로그는 이미 커밋돼 화면에 먼저 뜬다. 이를 확인하는 테스트(1.5초 지연 요청을 보내 두고, 응답이 오기 전에 DB에 로그가 있는지 검사)를 두었고, 실행 중 요청 스레드 이름이 <code>tomcat-handler-N</code>인 것으로 가상 스레드 적용을 확인했다. 같은 이유로 <code>open-in-view</code>를 꺼 두어 30분짜리 SSE 연결도 커넥션을 잡지 않는다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.4 새 데이터가 계속 들어오는 목록의 페이지네이션</h3>
+<dl>
+  <dt>문제</dt><dd>목록을 보는 중에도 웹훅이 들어온다. 오프셋 방식이면 앞에 새 행이 끼면서 페이지가 밀려 같은 요청이 두 번 보이거나 빠지고, 뒤 페이지로 갈수록 앞의 행을 세고 버려 느려진다.</dd>
+  <dt>선택</dt><dd><code>WHERE endpoint_id = ? AND request_id &lt; :cursor ORDER BY request_id DESC</code> 커서 방식으로 하고, 같은 순서의 복합 인덱스를 두었다. 다음 페이지 여부는 COUNT 쿼리 대신 <code>size + 1</code>개를 조회해 판단하고, 첫 페이지는 cursor를 <code>Long.MAX_VALUE</code>로 둬서 메서드 하나로 처리했다. Spring Data의 <code>Pageable</code>은 OFFSET을 쓰므로 <code>Limit</code>을 썼다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.5 인증과 접근 제어</h3>
+<dl>
+  <dt>토큰</dt><dd>익명 토큰은 32바이트 난수(Base64URL)로 만들고 DB에는 SHA-256 해시만 저장한다. BCrypt는 추측 가능한 비밀번호를 느리게 만들어 막는 용도라, 무차별 대입이 불가능한 난수 토큰에는 빠른 해시로 충분하고 바로 조회할 수 있다고 판단했다. 비교는 <code>equals</code> 대신 <code>MessageDigest.isEqual</code>로 해서 응답 시간으로 일치 길이를 추측하는 타이밍 공격을 피했다.</dd>
+  <dt>IDOR</dt><dd>주인 확인은 "주소의 slug가 내 것인가"만 본다. 그래서 내 토큰으로 <code>/api/endpoints/{내 slug}/requests/{남의 id}</code>를 요청하면 통과해 버린다. 상세 조회를 <code>findByIdAndEndpointId</code>로 바꿔 남의 요청은 조회 결과에 아예 나오지 않게 했고, 존재 여부를 숨기려고 403이 아닌 404를 준다. 존재하지 않는 id와 남의 id가 같은 응답이라는 것도 테스트로 고정했다.</dd>
+  <dt>상태 코드</dt><dd>토큰이 없으면 401, 있는데 남의 것이면 403, 잘못된 파라미터(<code>size=0</code>, <code>cursor=abc</code>)는 500이 아닌 400이 되도록 예외 핸들러를 보강했다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.6 사용자가 정한 응답 헤더 — 헤더 주입</h3>
+<dl>
+  <dt>문제</dt><dd>응답 설정의 헤더는 웹훅 응답에 그대로 나간다. 값에 <code>\r\n</code>이 있으면 <code>X-A: x\r\nSet-Cookie: ...</code>처럼 헤더를 끼워 넣을 수 있다(HTTP 응답 분할). 또 <code>Content-Length</code>를 실제와 다르게 넣으면 응답이 잘린다.</dd>
+  <dt>선택</dt><dd>헤더 이름은 HTTP 규격이 허용하는 문자만 받는 정규식(허용 목록)으로, 값은 줄바꿈만 막았다. 어느 헤더가 왜 틀렸는지 메시지에 담아 400으로 돌려준다. 전송 제어 헤더(Content-Length, Transfer-Encoding 등)는 저장은 하되 응답할 때 무시한다. 저장은 PUT 하나로 있으면 변경 감지로 UPDATE, 없으면 INSERT하는 upsert라 여러 번 눌러도 규칙은 하나다.</dd>
+</dl>
+</div>
+
+<div class="issue">
+<h3>4.7 바디를 원본 그대로 읽기</h3>
+<dl>
+  <dt>문제</dt><dd>폼 형식(<code>application/x-www-form-urlencoded</code>)의 PUT 웹훅을 받으면 바디가 비어서 저장됐다.</dd>
+  <dt>원인</dt><dd>Spring의 <code>FormContentFilter</code>가 PUT·PATCH·DELETE 폼 바디를 먼저 읽어 파라미터로 바꿔 둔다. 바디 스트림은 한 번만 읽을 수 있어 컨트롤러에는 남은 게 없었다.</dd>
+  <dt>해결</dt><dd>관리 API는 JSON만 쓰므로 이 필터를 끄고, 수신부는 <code>@RequestBody</code>나 <code>getParameter()</code> 없이 입력 스트림을 바이트로 직접 읽는다. 이 경우를 고정하는 테스트를 남겼다.</dd>
+</dl>
+</div>
+
+<h2 class="pb"><span class="no">5</span>테스트</h2>
+<ul>
+  <li>테스트 59개(단위 + 통합). 통합 테스트는 H2 대신 Testcontainers로 실제 MySQL을 띄운다 — JSON 컬럼, 인덱스, CASCADE가 운영과 같게 동작해야 의미가 있다고 봤다.</li>
+  <li>SSE는 MockMvc로는 끝나지 않는 응답을 읽기 어려워, 실제 포트로 서버를 띄우고 자바 <code>HttpClient</code>로 스트림에 연결한 상태에서 웹훅을 보내 <code>event:request</code>가 도착하는지 확인했다. 무한 대기를 막으려고 5초 제한을 걸었다.</li>
+  <li>보안 관련 테스트는 실제로 검사 코드를 지웠을 때 실패하는지 확인했다(헤더 검사 호출을 빼면 2개 실패, 리스너 전송을 빼면 E2E 실패).</li>
+  <li>시간은 <code>Clock</code> 빈에서만 가져와서 "발급 24시간 뒤 만료"를 시간을 고정해 경계값(1초 전·정각·1초 후)으로 검증했다.</li>
+</ul>
+<table>
+  <tr><th style="width:30%">테스트 클래스</th><th>확인 내용</th></tr>
+  <tr><td>EndpointApiTest 외 3개</td><td>발급, slug 형식·중복 재시도, 토큰 해시, 만료 경계</td></tr>
+  <tr><td>HookReceiveApiTest</td><td>원본 저장, 폼 PUT 바디, 같은 이름 헤더, 404/410, 규칙 응답, 지연, 지연 중 로그 선저장</td></tr>
+  <tr><td>RequestLogApiTest</td><td>커서 페이징(중복 없음), 다른 엔드포인트 분리, IDOR 404, 401/403/400</td></tr>
+  <tr><td>RequestStreamApiTest, E2ETest</td><td>구독·인증, 실제 스트림 수신</td></tr>
+  <tr><td>ResponseSettingsApiTest</td><td>upsert 멱등, 실제 웹훅 반영, 범위 검증, 헤더 주입 차단</td></tr>
+</table>
+
+<h2><span class="no">6</span>배포 구성</h2>
+<p>EC2 한 대에 Nginx, 백엔드, MySQL을 Docker Compose 하나로 띄우는 구성을 만들고, 로컬에서 같은 구성을 그대로 실행해 검증했다. RDS 대신 컨테이너 MySQL로 시작한 것은 일정과 비용 때문이며, 접속 주소만 바꾸면 옮길 수 있다.</p>
+<ul>
+  <li>밖으로는 Nginx의 80번만 연다. 백엔드(8080)와 MySQL(3306)은 Docker 내부망에서만 보인다.</li>
+  <li>백엔드·프론트 모두 2단계 빌드로, 실행 이미지에는 JRE + jar, Nginx + 빌드 결과만 담았다(프론트 이미지 74MB). 빌드 설정 파일을 먼저 복사해 의존성 층을 캐시한다.</li>
+  <li>Nginx는 SSE 경로에만 <code>proxy_buffering off</code>와 1시간 read timeout을 주고, <code>/e/:slug</code>에서 새로고침해도 404가 나지 않게 <code>try_files ... /index.html</code>을 둔다.</li>
+  <li>운영은 <code>ddl-auto: validate</code>라 엔티티에서 생성한 DDL을 MySQL 첫 실행 때 넣는다. 백엔드는 MySQL healthcheck가 healthy가 된 뒤에 시작한다.</li>
+  <li>Nginx 뒤에서 모든 IP가 Nginx 주소로 찍히는 문제는 <code>X-Forwarded-For</code> 전달과 <code>server.forward-headers-strategy: native</code>로 해결했다. 톰캣은 사설 대역에서 온 헤더만 믿어 외부 위조를 막는다.</li>
+</ul>
+
+<h2><span class="no">7</span>한계와 다음 계획</h2>
+<ul>
+  <li>EC2 실제 배포는 하지 않았다. 구성과 절차(<code>docs/deploy.md</code>)는 준비돼 있다.</li>
+  <li>2차: 회원·JWT, 엔드포인트별 분당 요청 제한(Redis), 요청 리플레이와 SSRF 차단, 로그 보관 기간 정리 스케줄러, GitHub Actions 배포.</li>
+  <li>SSE 연결 목록이 서버 메모리에 있어서 서버가 여러 대면 다른 서버의 연결에 알림이 가지 않는다 → Redis Pub/Sub.</li>
+  <li>스키마를 SQL 파일로 관리하고 있어 엔티티를 바꿀 때마다 다시 생성해야 한다 → Flyway.</li>
+  <li>바이너리 바디는 UTF-8 문자열로 저장해 깨질 수 있고, 같은 엔드포인트에 응답 설정 첫 저장이 동시에 오면 규칙이 두 개 생길 수 있다.</li>
+</ul>
+
+<h2><span class="no">8</span>회고</h2>
+<p>기능마다 "무엇을 왜 이렇게 하는지"를 먼저 정리하고 코드를 쓰는 식으로 진행했다. 덕분에 커서 페이징, AFTER_COMMIT 리스너, IDOR처럼 처음엔 그냥 넘어갔을 부분을 직접 비교하고 고를 수 있었다.</p>
+<p>가장 기억에 남는 건 설정 오타다. <code>threads</code>를 <code>thread</code>로, <code>forward-headers-strategy</code>를 <code>forword</code>로 쓴 적이 있는데, Spring은 모르는 키를 오류 없이 무시해서 앱은 잘 뜨고 기능만 조용히 빠진다. 그 뒤로는 설정을 바꾸면 실제 동작(스레드 이름, 저장된 IP)을 눈으로 확인하는 습관을 들였다. 같은 이유로 테스트도 "통과하는지"보다 "검사 코드를 지우면 실패하는지"를 확인하게 됐다.</p>
+<p>아쉬운 점은 배포까지 마치지 못한 것이다. 일정 안에서 범위를 정할 때 프론트와 배포의 비중을 너무 작게 잡았다. 다음에는 배포 구성을 초반에 먼저 만들어 두고 기능을 올리는 순서로 하려고 한다.</p>
+
+</body>
+</html>

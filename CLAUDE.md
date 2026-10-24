@@ -58,7 +58,9 @@
   - `frontend/nginx.conf`: 정적 파일 + `/api`·`/h` 프록시 + stream만 `proxy_buffering off`·`proxy_read_timeout 1h` + `try_files ... /index.html`(SPA).
   - 실제 IP: Nginx가 `X-Forwarded-For` 전달 + prod `server.forward-headers-strategy: native`. Redis는 운영에 안 띄움(`management.health.redis.enabled: false`).
   - 운영 비밀 값은 `.env.prod`(Git 제외), 예시는 `.env.prod.example`. EC2는 t3.micro + 스왑 2GB.
-- 다음: EC2 생성·배포(`docs/deploy.md`) → 깃허브 웹훅으로 실제 확인.
+- EC2 실제 배포는 보류(10/24 결정). 대신 포트폴리오 자료 작성: `README.md`(GitHub), `docs/portfolio/HookLens_프로젝트기술서.pdf`(A4 7쪽), `docs/portfolio/HookLens_포트폴리오.pdf`(가로 9장). 원본은 같은 폴더의 `technical-spec.html`, `portfolio.html` → Chrome headless로 PDF 출력. 화면 캡처는 `docs/images/`.
+  - 문체 원칙: 이모지·과장 표현 없이 "문제 → 비교 → 선택 → 결과", 실제 수치(테스트 59개, 커밋 26개, PR 8개, 10일).
+- 다음(선택): EC2 생성·배포(`docs/deploy.md`) → 깃허브 웹훅으로 실제 확인.
 - 남은 일: 회원 엔드포인트(만료 없음) 생성 메서드가 생기면(REQ-AUTH) `isExpired` 테스트 추가
 - 기능을 마칠 때마다 이 섹션을 갱신한다.
 
