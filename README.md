@@ -3,7 +3,7 @@
 결제사나 깃허브가 보내는 웹훅을 고유 URL로 받아서 실시간으로 보여주고, 정해 둔 응답을 돌려주는 웹훅 디버거입니다.
 개인 프로젝트로 2026.10.13 ~ 10.22에 만들었습니다. (Spring Boot 4 · React 19 · MySQL · Docker)
 
-📄 [프로젝트 기술서 (PDF)](docs/portfolio/HookLens_프로젝트기술서.pdf) · [포트폴리오 (PDF)](docs/portfolio/HookLens_포트폴리오.pdf)
+📄 [기획서](docs/planning.md) · [API 명세서](docs/api.md) · [프로젝트 기술서 (PDF)](docs/portfolio/HookLens_프로젝트기술서.pdf) · [포트폴리오 (PDF)](docs/portfolio/HookLens_포트폴리오.pdf)
 
 ![요청 목록과 상세](docs/images/requests.jpg)
 
@@ -82,7 +82,7 @@ HookLens는 인터넷에서 접근할 수 있는 주소를 하나 만들어 주�
 | GET | `/api/endpoints/{slug}/stream` | 새 요청 실시간 수신 (SSE) |
 | GET / PUT | `/api/endpoints/{slug}/response` | 응답 설정 조회 / 저장 |
 
-관리 API는 `{ "success", "data", "error": { "code", "message" } }` 형식으로 응답하고 `X-Anonymous-Token` 헤더가 필요합니다.
+관리 API는 `{ "success", "data", "error": { "code", "message" } }` 형식으로 응답하고 `X-Anonymous-Token` 헤더가 필요합니다. 요청·응답 예시와 에러 코드는 [API 명세서](docs/api.md)에 있습니다.
 
 ## 실행
 
