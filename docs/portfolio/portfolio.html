@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>HookLens 포트폴리오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #1c1c1c; word-break: keep-all; }
+  .page { width: 297mm; height: 210mm; padding: 16mm 20mm 14mm; position: relative; overflow: hidden; break-after: page; display: flex; flex-direction: column; }
+  .page:last-child { break-after: auto; }
+  .kicker { font-size: 9pt; letter-spacing: 1.5px; color: #2b4a8b; font-weight: 500; margin-bottom: 2mm; }
+  h1 { font-size: 40pt; font-weight: 800; margin: 0; letter-spacing: -1px; }
+  h2 { font-size: 24pt; font-weight: 700; margin: 0 0 7mm; letter-spacing: -0.4px; }
+  h3 { font-size: 14pt; margin: 0 0 2.5mm; }
+  p, li { font-size: 12.3pt; line-height: 1.7; }
+  p { margin: 0 0 2.5mm; }
+  ul { margin: 0; padding-left: 4.5mm; }
+  li { margin-bottom: 1.2mm; }
+  code { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 9pt; background: #f1f1ee; padding: 0.2mm 1mm; border-radius: 2px; }
+  .foot { position: absolute; left: 20mm; right: 20mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 8pt; color: #999; }
+  .rule { border-top: 1.5px solid #1c1c1c; margin: 5mm 0; }
+  .muted { color: #666; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7mm; }
+  .cell { border-top: 1px solid #cfcfca; padding-top: 3mm; }
+  .num { font-size: 30pt; font-weight: 800; letter-spacing: -0.5px; }
+  .label { font-size: 10pt; color: #666; }
+  img.shot { width: 100%; border: 1px solid #d6d6d1; display: block; }
+  .case { display: grid; grid-template-columns: 15mm 1fr; gap: 3mm 4mm; font-size: 12pt; line-height: 1.7; margin: 0; }
+  .case dt { color: #2b4a8b; font-weight: 500; }
+  .case dd { margin: 0; }
+  .box { border: 1px solid #cfcfca; padding: 7mm 8mm; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm; margin-top: 2mm; }
+  .flow div { border: 1px solid #cfcfca; padding: 4mm 5mm; font-size: 11.5pt; line-height: 1.6; position: relative; }
+  .flow div b { display: block; color: #2b4a8b; font-size: 10pt; margin-bottom: 1mm; }
+  .flow div:not(:last-child)::after { content: "→"; position: absolute; right: -5mm; top: 50%; transform: translateY(-50%); color: #888; }
+  .cover { justify-content: space-between; }
+  .cover .bottom { display: grid; grid-template-columns: repeat(4, auto); gap: 10mm; justify-content: start; border-top: 1.5px solid #1c1c1c; padding-top: 5mm; font-size: 10pt; }
+  .cover .bottom div span { display: block; color: #777; font-size: 8.5pt; margin-bottom: 1mm; }
+  a.gh { color: #2b4a8b; text-decoration: none; font-weight: 500; }
+  .ghline { display: inline-flex; align-items: center; gap: 3mm; margin-top: 6mm; padding: 2.5mm 5mm; border: 1.5px solid #2b4a8b; font-size: 13pt; }
+  .ghline span { color: #666; font-size: 10pt; letter-spacing: 1px; }
+  .foot a { color: #2b4a8b; text-decoration: none; }
+  svg text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- 1. 표지 -->
+<section class="page cover">
+  <div>
+    <div class="kicker">PERSONAL PROJECT · 2026.10</div>
+    <h1>HookLens</h1>
+    <p style="font-size:15pt; margin-top:3mm; color:#333">결제사·깃허브 웹훅을 받아서 실시간으로 보여주고,<br>정해 둔 응답을 돌려주는 웹훅 디버거</p>
+    <div class="ghline"><span>GITHUB</span><a class="gh" href="https://github.com/songjeongseon1/hooklens">github.com/songjeongseon1/hooklens</a></div>
+  </div>
+  <img class="shot" src="../images/requests.jpg" style="width:72%; align-self:flex-end; margin: 4mm 0;">
+  <div class="bottom">
+    <div><span>기간</span>2026.10.13 – 10.22</div>
+    <div><span>역할</span>1인 · 기획 / 백엔드 / 프론트 / 배포 구성</div>
+    <div><span>스택</span>Spring Boot 4 · React 19 · MySQL · Docker</div>
+    <div><span>GitHub</span><a class="gh" href="https://github.com/songjeongseon1/hooklens">github.com/songjeongseon1/hooklens</a></div>
+  </div>
+</section>
+
+<!-- 2. 문제와 해결 -->
+<section class="page">
+  <div class="kicker">WHY</div>
+  <h2>웹훅 연동을 만들 때 반복해서 막히는 세 가지</h2>
+  <div class="grid3">
+    <div class="cell">
+      <h3>뭐가 오는지 모른다</h3>
+      <p class="muted">결제사가 실제로 보내는 헤더와 바디를 문서만으로는 확신하기 어렵다.</p>
+      <p><b>들어온 요청을 가공하지 않고</b> 메서드·경로·쿼리·헤더·바디·IP·시각까지 그대로 기록해서 보여준다.</p>
+    </div>
+    <div class="cell">
+      <h3>내 PC로는 안 온다</h3>
+      <p class="muted">결제사 서버는 인터넷에 있고, 개발 중인 localhost에는 웹훅을 보낼 수 없다.</p>
+      <p>버튼 한 번으로 <b>인터넷에서 접근 가능한 주소</b>를 발급한다. 가입 없이 24시간 동안 쓴다.</p>
+    </div>
+    <div class="cell">
+      <h3>실패하면 어떻게 되나</h3>
+      <p class="muted">우리 서버가 실패하거나 느릴 때 결제사가 재전송하는지 미리 볼 방법이 없다.</p>
+      <p>응답 코드·헤더·바디·<b>지연(0~5초)</b>을 정해 두면 다음 웹훅부터 그대로 응답한다.</p>
+    </div>
+  </div>
+  <div class="rule"></div>
+  <div class="grid3" style="grid-template-columns: repeat(4, 1fr);">
+    <div><div class="num">8 / 8</div><div class="label">MVP 요구사항 완료</div></div>
+    <div><div class="num">59</div><div class="label">테스트 (실제 MySQL 통합 테스트 포함)</div></div>
+    <div><div class="num">8</div><div class="label">기능별 PR · 커밋 26개</div></div>
+    <div><div class="num">10일</div><div class="label">설계부터 배포 구성까지</div></div>
+  </div>
+  <div class="rule"></div>
+  <h3>쓰는 흐름</h3>
+  <div class="flow">
+    <div><b>1. 발급</b>이름만 넣고 버튼을 누르면 <code>/h/{slug}</code> 주소가 생긴다</div>
+    <div><b>2. 등록</b>결제사나 깃허브 설정의 웹훅 URL 칸에 붙여 넣는다</div>
+    <div><b>3. 확인</b>테스트 결제를 하면 요청이 화면에 바로 뜨고 헤더·바디를 본다</div>
+    <div><b>4. 실패 재현</b>응답을 503·3초로 바꿔 상대가 재전송하는지 본다</div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>2</span></div>
+</section>
+
+<!-- 3. 화면 -->
+<section class="page">
+  <div class="kicker">PRODUCT</div>
+  <h2>새로고침 없이 들어오는 요청을 바로 본다</h2>
+  <div style="display:grid; grid-template-columns: 1.55fr 1fr; gap: 8mm; align-items: start;">
+    <div>
+      <img class="shot" src="../images/requests.jpg">
+      <p class="muted" style="font-size:9pt; margin-top:2mm">결제 웹훅 3건이 실시간으로 들어왔고, 재전송 요청의 헤더(<code>...Retried-Count: 1</code>)와 바디를 보고 있다.</p>
+    </div>
+    <div>
+      <img class="shot" src="../images/response-settings.jpg">
+      <p class="muted" style="font-size:9pt; margin: 2mm 0 5mm">503 + 3초 지연 + <code>Retry-After</code>로 바꾸면 다음 웹훅부터 이 응답이 나간다.</p>
+      <ul>
+        <li>목록은 최신순 커서 페이지네이션</li>
+        <li>상세는 쿼리 표, 헤더 표, JSON 바디 정렬</li>
+        <li>로그인 대신 발급 때 한 번 받는 토큰으로 주인 확인</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>3</span></div>
+</section>
+
+<!-- 4. 구조 -->
+<section class="page">
+  <div class="kicker">ARCHITECTURE</div>
+  <h2>수신 · 저장 · 알림을 분리했다</h2>
+  <svg viewBox="0 0 900 280" width="100%" style="margin-bottom: 5mm">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker></defs>
+    <g font-size="13" fill="#1c1c1c">
+      <rect x="10" y="20" width="150" height="54" fill="#fff" stroke="#555"/><text x="85" y="44" text-anchor="middle">결제사 · 깃허브</text><text x="85" y="62" text-anchor="middle" font-size="11" fill="#666">POST /h/{slug}</text>
+      <rect x="10" y="170" width="150" height="54" fill="#fff" stroke="#555"/><text x="85" y="194" text-anchor="middle">브라우저 (React)</text><text x="85" y="212" text-anchor="middle" font-size="11" fill="#666">목록 · 상세 · 설정</text>
+      <rect x="240" y="92" width="140" height="64" fill="#f3f3f0" stroke="#555"/><text x="310" y="119" text-anchor="middle">Nginx :80</text><text x="310" y="138" text-anchor="middle" font-size="11" fill="#666">화면 · 프록시 · SSE</text>
+      <rect x="460" y="60" width="300" height="128" fill="#f3f3f0" stroke="#555"/>
+      <text x="610" y="84" text-anchor="middle" font-weight="700">Spring Boot</text>
+      <rect x="478" y="98" width="80" height="36" fill="#fff" stroke="#999"/><text x="518" y="121" text-anchor="middle" font-size="11">수신·저장</text>
+      <rect x="570" y="98" width="80" height="36" fill="#fff" stroke="#999"/><text x="610" y="121" text-anchor="middle" font-size="11">커밋 후 이벤트</text>
+      <rect x="662" y="98" width="80" height="36" fill="#fff" stroke="#999"/><text x="702" y="121" text-anchor="middle" font-size="11">SSE 전송</text>
+      <text x="610" y="164" text-anchor="middle" font-size="11" fill="#666">가상 스레드 · 지연은 트랜잭션 밖에서</text>
+      <rect x="810" y="98" width="80" height="54" fill="#fff" stroke="#555"/><text x="850" y="130" text-anchor="middle">MySQL</text>
+    </g>
+    <g stroke="#555" stroke-width="1.3" fill="none" marker-end="url(#a)">
+      <path d="M160,47 L238,108"/><path d="M160,197 L238,140"/><path d="M380,124 L458,124"/><path d="M760,124 L808,124"/>
+      <path d="M558,116 L568,116"/><path d="M650,116 L660,116"/>
+    </g>
+    <path d="M700,188 C640,250 260,250 162,212" stroke="#2b4a8b" stroke-width="1.4" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
+    <text x="430" y="272" text-anchor="middle" font-size="12" fill="#2b4a8b">새 요청 알림 (fetch 스트림, 헤더 인증)</text>
+  </svg>
+  <div class="grid3">
+    <div class="cell"><h3>수신은 알림을 모른다</h3><p>저장 후 이벤트만 발행한다. 서버를 늘려 Redis Pub/Sub로 바꿔도 수신 코드는 그대로다.</p></div>
+    <div class="cell"><h3>밖으로는 80번만</h3><p>Nginx 하나가 화면과 API를 같은 주소로 제공해 CORS 설정이 없다. 백엔드·DB 포트는 열지 않는다.</p></div>
+    <div class="cell"><h3>응답 형식 통일</h3><p>관리 API는 <code>{success, data, error}</code>, 에러 코드는 enum 한 곳. 웹훅 수신만 사용자 설정대로 응답한다.</p></div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>4</span></div>
+</section>
+
+<!-- 5. 결정 1 -->
+<section class="page">
+  <div class="kicker">DECISIONS · 1</div>
+  <h2>실시간 알림을 안전하게 보내기</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>SSE인데 EventSource를 쓰지 않았다</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>관리 API는 헤더로 인증하는데 <code>EventSource</code>는 커스텀 헤더를 못 보낸다.</dd>
+        <dt>비교</dt><dd>쿼리 파라미터는 로그·기록에 토큰이 남고, 일회용 티켓은 저장소와 재발급이 필요하고, 쿠키는 인증이 둘로 갈린다.</dd>
+        <dt>선택</dt><dd><code>fetch</code>로 스트림을 직접 읽고 SSE를 파싱하는 훅. 끊기면 3초 뒤 재연결, 놓친 건 목록 API로 보충.</dd>
+        <dt>결과</dt><dd>인증 방식 하나, 토큰은 URL에 남지 않음.</dd>
+      </dl>
+    </div>
+    <div class="box">
+      <h3>알림은 커밋이 끝난 뒤에</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>저장 중에 알리면 화면이 상세를 조회할 때 아직 커밋 전이라 404, 롤백되면 없는 요청을 알린다.</dd>
+        <dt>선택</dt><dd><code>@TransactionalEventListener(AFTER_COMMIT)</code>. 이벤트에는 엔티티 대신 DTO를 담아 트랜잭션 밖 LAZY 예외를 피함.</dd>
+        <dt>결과</dt><dd>실제 서버를 띄운 E2E 테스트로 확인. 리스너 전송을 지우면 테스트가 실패하는 것까지 확인했다.</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>5</span></div>
+</section>
+
+<!-- 6. 결정 2 -->
+<section class="page">
+  <div class="kicker">DECISIONS · 2</div>
+  <h2>느린 응답과 계속 늘어나는 목록</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>지연 응답이 커넥션을 잡지 않게</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>최대 5초 지연을 트랜잭션 안에서 기다리면 커넥션 풀(10개)이 바닥나고, 톰캣 스레드도 묶인다.</dd>
+        <dt>비교</dt><dd>그냥 sleep / DeferredResult 비동기 / 가상 스레드</dd>
+        <dt>선택</dt><dd>로그를 먼저 커밋하고 컨트롤러에서 대기 + 가상 스레드. 코드는 sleep 그대로.</dd>
+        <dt>결과</dt><dd>지연 중에도 로그가 먼저 화면에 뜨는 것을 테스트로 고정. 스레드 이름 <code>tomcat-handler-N</code>으로 적용 확인.</dd>
+      </dl>
+    </div>
+    <div class="box">
+      <h3>보는 중에도 쌓이는 목록</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>오프셋 페이징은 새 웹훅이 앞에 끼면 목록이 밀려 중복·누락이 생기고, 뒤로 갈수록 느리다.</dd>
+        <dt>선택</dt><dd><code>request_id &lt; cursor</code> 커서 방식 + 같은 순서의 복합 인덱스. 다음 페이지는 COUNT 대신 <code>size + 1</code>개 조회로 판단.</dd>
+        <dt>결과</dt><dd>3건을 2건씩 나눠 보면 2 + 1, 중복 없음을 테스트로 확인.</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>6</span></div>
+</section>
+
+<!-- 7. 결정 3 -->
+<section class="page">
+  <div class="kicker">DECISIONS · 3</div>
+  <h2>로그인 없이 쓰는 서비스의 보안</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>남의 요청을 id로 훔쳐보기 (IDOR)</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>주인 확인은 slug만 본다. 내 토큰 + 내 slug + <b>남의 요청 id</b>면 통과해 버린다.</dd>
+        <dt>선택</dt><dd><code>findByIdAndEndpointId</code>로 조건을 쿼리에 넣어 남의 것은 조회조차 안 되게. 403 대신 404로 존재 여부도 숨김.</dd>
+        <dt>토큰</dt><dd>32바이트 난수, DB엔 SHA-256 해시만. 비교는 <code>MessageDigest.isEqual</code>(타이밍 공격 방지).</dd>
+      </dl>
+    </div>
+    <div class="box">
+      <h3>사용자가 정한 응답 헤더 (헤더 주입)</h3>
+      <dl class="case">
+        <dt>문제</dt><dd>설정한 헤더가 응답에 그대로 나간다. 값에 <code>\r\n</code>이 있으면 <code>Set-Cookie</code> 같은 헤더를 끼워 넣을 수 있다.</dd>
+        <dt>선택</dt><dd>이름은 허용 문자 정규식, 값은 줄바꿈 금지. 어느 헤더가 왜 틀렸는지 400 메시지로. <code>Content-Length</code> 같은 전송 헤더는 무시.</dd>
+        <dt>결과</dt><dd>검사 호출을 빼면 테스트 2개가 실패하는 것을 확인.</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>7</span></div>
+</section>
+
+<!-- 8. 테스트·배포 -->
+<section class="page">
+  <div class="kicker">QUALITY · DEPLOY</div>
+  <h2>테스트는 실제 DB로, 배포는 같은 구성으로</h2>
+  <div class="grid2">
+    <div>
+      <h3>테스트 59개</h3>
+      <ul>
+        <li>H2 대신 Testcontainers로 <b>실제 MySQL</b>을 띄워 JSON 컬럼·인덱스·CASCADE까지 검증</li>
+        <li>SSE는 실제 포트로 서버를 띄우고 <code>HttpClient</code>로 스트림에 붙어 이벤트 도착을 확인 (5초 제한)</li>
+        <li>시간은 <code>Clock</code> 빈에서만 가져와 만료 경계(1초 전·정각·1초 후)를 고정해 검증</li>
+        <li>보안 테스트는 검사 코드를 지웠을 때 실패하는지까지 확인</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Docker Compose 배포 구성</h3>
+      <ul>
+        <li>Nginx + Spring Boot + MySQL, 밖으로는 80번만. 2단계 빌드로 실행 이미지 최소화(프론트 74MB)</li>
+        <li>SSE 경로만 <code>proxy_buffering off</code>, SPA 새로고침은 <code>try_files</code></li>
+        <li>운영은 <code>ddl-auto: validate</code> — 엔티티에서 만든 DDL을 MySQL 첫 실행 때 적용</li>
+        <li>Nginx 뒤 실제 IP는 <code>X-Forwarded-For</code> + <code>forward-headers-strategy</code></li>
+        <li>로컬에서 운영 구성 그대로 띄워 화면·SSE·IP·시간대 확인 (EC2 배포는 다음 단계)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>8</span></div>
+</section>
+
+<!-- 9. 회고 -->
+<section class="page">
+  <div class="kicker">RETROSPECTIVE</div>
+  <h2>배운 것과 다음에 할 것</h2>
+  <div class="grid2">
+    <div>
+      <h3>설정은 오류 없이 틀린다</h3>
+      <p><code>threads</code>를 <code>thread</code>로, <code>forward</code>를 <code>forword</code>로 쓴 적이 있다. Spring은 모르는 키를 조용히 무시해서 앱은 잘 뜨고 기능만 빠진다. 그 뒤로 설정을 바꾸면 스레드 이름, 저장된 IP처럼 <b>실제 동작을 눈으로 확인</b>한다.</p>
+      <h3 style="margin-top:6mm">"왜"를 먼저 쓰고 코드를 썼다</h3>
+      <p>기능마다 선택지를 비교하고 이유를 문서로 남긴 뒤 구현했다. 커서 페이징, AFTER_COMMIT, IDOR처럼 그냥 지나칠 뻔한 부분을 직접 고를 수 있었다.</p>
+    </div>
+    <div>
+      <h3>아쉬운 점</h3>
+      <p>범위를 잡을 때 프론트와 배포의 비중을 작게 봐서 EC2 배포까지는 마치지 못했다. 다음에는 배포 구성을 먼저 만들고 기능을 올리는 순서로 하려고 한다.</p>
+      <h3 style="margin-top:6mm">다음 단계</h3>
+      <ul>
+        <li>EC2 배포, GitHub Actions 자동 배포</li>
+        <li>회원·JWT, 분당 요청 제한(Redis), 요청 리플레이와 SSRF 차단</li>
+        <li>다중 서버 SSE(Redis Pub/Sub), 스키마 이력 관리(Flyway)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="ghline" style="margin-top:9mm; align-self:flex-start"><span>코드 · 기술서 · 배포 절차</span><a class="gh" href="https://github.com/songjeongseon1/hooklens">github.com/songjeongseon1/hooklens</a></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>9</span></div>
+</section>
+
+</body>
+</html>
