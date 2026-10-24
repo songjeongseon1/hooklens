@@ -45,6 +45,15 @@
   .ghline { display: inline-flex; align-items: center; gap: 3mm; margin-top: 6mm; padding: 2.5mm 5mm; border: 1.5px solid #2b4a8b; font-size: 13pt; }
   .ghline span { color: #666; font-size: 10pt; letter-spacing: 1px; }
   .foot a { color: #2b4a8b; text-decoration: none; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 10.3pt; line-height: 1.5; }
+  table.t th, table.t td { border-top: 1px solid #d6d6d1; padding: 1.5mm 2.2mm; text-align: left; vertical-align: top; }
+  table.t th { background: #f3f3f0; font-weight: 500; font-size: 9.5pt; }
+  table.t tr:last-child td { border-bottom: 1px solid #d6d6d1; }
+  table.t td.m { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8.4pt; white-space: nowrap; }
+  .tag { display: inline-block; font-size: 8.5pt; padding: 0 1.8mm; border: 1px solid #2b4a8b; color: #2b4a8b; border-radius: 2px; }
+  .tag.off { border-color: #bbb; color: #888; }
+  pre.j { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8.8pt; line-height: 1.5; background: #f6f6f3; border-left: 2px solid #c9c9c4; padding: 2.5mm 4mm; margin: 0 0 3mm; white-space: pre; }
+  .sub { font-size: 10pt; color: #2b4a8b; font-weight: 500; margin: 0 0 2mm; letter-spacing: 0.5px; }
   svg text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
 </style>
 </head>
@@ -106,6 +115,47 @@
   <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>2</span></div>
 </section>
 
+<!-- 기획 -->
+<section class="page">
+  <div class="kicker">PLANNING</div>
+  <h2>만들기 전에 범위부터 나눴다</h2>
+  <div style="display:grid; grid-template-columns: 1.15fr 1fr; gap: 10mm; align-items: start;">
+    <div>
+      <div class="sub">요구사항 — 1차 MVP (P0)</div>
+      <table class="t">
+        <tr><th style="width:30mm">ID</th><th>내용</th><th style="width:13mm">상태</th></tr>
+        <tr><td>EP-001</td><td>가입 없이 고유 주소 <code>/h/{slug}</code> 발급</td><td><span class="tag">완료</span></td></tr>
+        <tr><td>EP-002</td><td>비회원 주소 24시간 후 만료, 이후 410</td><td><span class="tag">완료</span></td></tr>
+        <tr><td>HOOK-001</td><td>모든 메서드·하위 경로 수신, 원본 그대로 저장</td><td><span class="tag">완료</span></td></tr>
+        <tr><td>HOOK-002</td><td>설정한 응답 반환, 없으면 200 <code>{"ok":true}</code></td><td><span class="tag">완료</span></td></tr>
+        <tr><td>LOG-001</td><td>새 요청 실시간 반영 (SSE)</td><td><span class="tag">완료</span></td></tr>
+        <tr><td>LOG-002 · 003</td><td>목록(최신순 커서) · 상세(쿼리·헤더·바디)</td><td><span class="tag">완료</span></td></tr>
+        <tr><td>RES-001</td><td>응답 설정 (상태 코드·헤더·바디·지연)</td><td><span class="tag">완료</span></td></tr>
+      </table>
+      <div class="sub" style="margin-top:5mm">2차 (P1) · 이후 (P2)</div>
+      <table class="t">
+        <tr><td style="width:30mm">P1</td><td>회원·JWT, 엔드포인트 관리, 분당 60건 제한(429), 바디 1MB 제한(413), 로그 보관 스케줄러, 리플레이·SSRF 차단</td><td style="width:13mm"><span class="tag off">예정</span></td></tr>
+        <tr><td>P2</td><td>조건부 응답, 로컬 서버로 자동 포워딩, cURL 내보내기, 검색</td><td><span class="tag off">예정</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="sub">나눈 기준</div>
+      <p><b>"주소 만들기 → 받기 → 보기 → 응답 바꾸기"</b>가 끊김 없이 되는 것까지를 1차로 잡았다. 회원과 요청 제한은 계속 쓰려면 필요하지만, 없어도 핵심 흐름은 확인할 수 있어서 2차로 미뤘다.</p>
+      <div class="sub" style="margin-top:4mm">정책</div>
+      <table class="t">
+        <tr><td style="width:24mm">관리 권한</td><td>발급 때 토큰을 한 번만 주고, 서버는 SHA-256 해시만 저장</td></tr>
+        <tr><td>만료</td><td>비회원 24시간 — 데이터가 무한히 쌓이지 않게</td></tr>
+        <tr><td>남의 요청</td><td>403이 아닌 404 — 존재 여부도 숨김</td></tr>
+        <tr><td>응답 지연</td><td>0~5초 — 길면 보낸 쪽이 타임아웃</td></tr>
+        <tr><td>응답 헤더</td><td>20개, 이름은 허용 문자만, 값에 줄바꿈 금지 (헤더 주입)</td></tr>
+        <tr><td>시간</td><td>모든 계층 KST, API는 <code>+09:00</code> 포함</td></tr>
+      </table>
+      <p class="muted" style="font-size:9.5pt; margin-top:3mm">전체 기획서: github.com/songjeongseon1/hooklens/blob/main/docs/planning.md</p>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>3</span></div>
+</section>
+
 <!-- 3. 화면 -->
 <section class="page">
   <div class="kicker">PRODUCT</div>
@@ -125,7 +175,7 @@
       </ul>
     </div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>3</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>4</span></div>
 </section>
 
 <!-- 4. 구조 -->
@@ -158,7 +208,57 @@
     <div class="cell"><h3>밖으로는 80번만</h3><p>Nginx 하나가 화면과 API를 같은 주소로 제공해 CORS 설정이 없다. 백엔드·DB 포트는 열지 않는다.</p></div>
     <div class="cell"><h3>응답 형식 통일</h3><p>관리 API는 <code>{success, data, error}</code>, 에러 코드는 enum 한 곳. 웹훅 수신만 사용자 설정대로 응답한다.</p></div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>4</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>5</span></div>
+</section>
+
+<!-- API -->
+<section class="page">
+  <div class="kicker">API</div>
+  <h2>API 7개, 응답 형식은 하나</h2>
+  <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap: 9mm; align-items: start;">
+    <div>
+      <table class="t">
+        <tr><th style="width:16mm">메서드</th><th>경로</th><th>설명</th><th style="width:12mm">인증</th></tr>
+        <tr><td class="m">POST</td><td class="m">/api/endpoints</td><td>엔드포인트 발급</td><td>-</td></tr>
+        <tr><td class="m">ANY</td><td class="m">/h/{slug}/**</td><td>웹훅 수신</td><td>-</td></tr>
+        <tr><td class="m">GET</td><td class="m">/api/endpoints/{slug}/requests</td><td>요청 목록 (커서)</td><td>토큰</td></tr>
+        <tr><td class="m">GET</td><td class="m">/api/endpoints/{slug}/requests/{id}</td><td>요청 상세</td><td>토큰</td></tr>
+        <tr><td class="m">GET</td><td class="m">/api/endpoints/{slug}/stream</td><td>실시간 구독 (SSE)</td><td>토큰</td></tr>
+        <tr><td class="m">GET</td><td class="m">/api/endpoints/{slug}/response</td><td>응답 설정 조회</td><td>토큰</td></tr>
+        <tr><td class="m">PUT</td><td class="m">/api/endpoints/{slug}/response</td><td>응답 설정 저장</td><td>토큰</td></tr>
+      </table>
+      <div class="sub" style="margin-top:5mm">인증 확인 순서 — 헤더 <code>X-Anonymous-Token</code></div>
+      <div class="flow" style="margin-top:0; grid-template-columns: repeat(4, minmax(0, 1fr));">
+        <div><b>401</b>토큰 없음<br><span class="muted" style="font-size:9.5pt">DB 조회 전에</span></div>
+        <div><b>404</b>없는 slug</div>
+        <div><b>410</b>만료됨</div>
+        <div><b>403</b>토큰 불일치<br><span class="muted" style="font-size:9.5pt">시간 일정 비교</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="sub">성공 · 실패 모두 같은 모양 (실제 응답)</div>
+<pre class="j">{
+  "success": true,
+  "data": {
+    "items": [{ "requestId": 6, "method": "POST",
+                "path": "/payments/webhook", ... }],
+    "nextCursor": null
+  },
+  "error": null
+}</pre>
+<pre class="j">{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "헤더 값에 줄바꿈을 넣을 수 없습니다: X-A"
+  }
+}</pre>
+      <p style="font-size:11pt">에러 코드는 enum 한 곳(<code>ErrorCode</code>)에서 관리한다. 웹훅 수신(<code>/h/**</code>)만 이 형식 대신 사용자가 정한 응답을 그대로 돌려준다.</p>
+      <p class="muted" style="font-size:9.5pt">요청·응답 필드와 에러 전체: github.com/songjeongseon1/hooklens/blob/main/docs/api.md</p>
+    </div>
+  </div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>6</span></div>
 </section>
 
 <!-- 5. 결정 1 -->
@@ -184,7 +284,7 @@
       </dl>
     </div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>5</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>7</span></div>
 </section>
 
 <!-- 6. 결정 2 -->
@@ -210,7 +310,7 @@
       </dl>
     </div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>6</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>8</span></div>
 </section>
 
 <!-- 7. 결정 3 -->
@@ -235,7 +335,7 @@
       </dl>
     </div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>7</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>9</span></div>
 </section>
 
 <!-- 8. 테스트·배포 -->
@@ -263,7 +363,7 @@
       </ul>
     </div>
   </div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>8</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>10</span></div>
 </section>
 
 <!-- 9. 회고 -->
@@ -289,7 +389,7 @@
     </div>
   </div>
   <div class="ghline" style="margin-top:9mm; align-self:flex-start"><span>코드 · 기술서 · 배포 절차</span><a class="gh" href="https://github.com/songjeongseon1/hooklens">github.com/songjeongseon1/hooklens</a></div>
-  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>9</span></div>
+  <div class="foot"><a href="https://github.com/songjeongseon1/hooklens">HookLens · github.com/songjeongseon1/hooklens</a><span>11</span></div>
 </section>
 
 </body>
