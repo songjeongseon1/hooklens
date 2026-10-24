@@ -1,0 +1,53 @@
+
+  @page { size: A4; margin: 18mm 17mm 18mm 17mm;
+    @bottom-right { content: counter(page); font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 8.5pt; color: #888; }
+    @bottom-left { content: "__FOOTER__"; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 8.5pt; color: #888; }
+  }
+  @page :first { @bottom-left { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 9.6pt; line-height: 1.68; color: #1f1f1f; margin: 0; word-break: keep-all; }
+  h1 { font-size: 22pt; margin: 0 0 2mm; letter-spacing: -0.3px; }
+  h2 { font-size: 13pt; margin: 9mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1.4px solid #1f1f1f; break-after: avoid; }
+  h3 { font-size: 10.6pt; margin: 6mm 0 1.5mm; break-after: avoid; }
+  h2 .no { color: #2b4a8b; margin-right: 2mm; }
+  p { margin: 0 0 2.2mm; }
+  ul { margin: 0 0 2.2mm; padding-left: 4.5mm; }
+  li { margin-bottom: 0.8mm; }
+  code, .mono { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8.4pt; }
+  code { background: #f2f2f0; padding: 0.2mm 1mm; border-radius: 2px; }
+  pre { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8pt; line-height: 1.5; background: #f6f6f4; border-left: 2px solid #c9c9c4; padding: 2.5mm 3.5mm; margin: 0 0 3mm; white-space: pre; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; font-size: 8.9pt; break-inside: avoid; }
+  th, td { border-top: 1px solid #d8d8d4; padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #f4f4f1; font-weight: 500; }
+  tr:last-child td { border-bottom: 1px solid #d8d8d4; }
+  .meta { display: grid; grid-template-columns: 22mm 1fr; gap: 0.6mm 4mm; font-size: 9pt; margin: 5mm 0 0; padding: 4mm 0; border-top: 1px solid #1f1f1f; border-bottom: 1px solid #d8d8d4; }
+  .meta dt { color: #666; } .meta dd { margin: 0; }
+  .lead { font-size: 10.6pt; color: #333; margin-top: 1mm; }
+  figure { margin: 2mm 0 4mm; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #d8d8d4; display: block; }
+  figcaption { font-size: 8.3pt; color: #666; margin-top: 1.2mm; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
+  .two figure img { height: 52mm; object-fit: cover; object-position: top; }
+  .issue { break-inside: avoid; margin-bottom: 5mm; }
+  .issue h3 { margin-top: 5mm; }
+  .issue dl { display: grid; grid-template-columns: 17mm 1fr; gap: 1mm 3mm; margin: 0; }
+  .issue dt { color: #2b4a8b; font-weight: 500; }
+  .issue dd { margin: 0; }
+  .note { color: #555; font-size: 8.8pt; }
+  .pb { break-before: page; }
+  a.gh { color: #2b4a8b; text-decoration: none; font-weight: 500; }
+  .ghline { display: inline-block; margin-top: 3mm; padding: 1.6mm 4mm; border: 1.3px solid #2b4a8b; font-size: 10.5pt; }
+  .ghline span { color: #666; font-size: 8.5pt; letter-spacing: 1px; margin-right: 2.5mm; }
+  svg text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+
+  ol { margin: 0 0 2.2mm; padding-left: 5mm; }
+  blockquote { margin: 1mm 0 3mm; padding: 2.5mm 4mm; border-left: 2.5px solid #2b4a8b; background: #f5f7fb; }
+  figure img { width: auto; max-width: 100%; max-height: 92mm; }
+  a { color: #2b4a8b; text-decoration: none; }
+  h2 { break-before: auto; }
+  td code { white-space: nowrap; }
+  table { break-inside: auto; }
+  tr { break-inside: avoid; }
+  thead { display: table-header-group; }
+  figure img { max-height: 70mm; }
